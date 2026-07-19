@@ -1,0 +1,55 @@
+<svg width="140" height="196" viewBox="0 0 140 196" xmlns="http://www.w3.org/2000/svg">
+  <!--
+    Ilustracao original da caravela do Capitulo 2 (Travessia do Atlantico).
+    Estilo: Historical Comic Art — contornos de tinta, hachura para sombra,
+    sem gradientes suaves (para nao lembrar renderizacao 3D de jogo).
+    Proa apontando para CIMA, ja que o navio viaja para o topo da tela.
+    Ilustracao autoral, sem uso de imagens de terceiros.
+  -->
+  <defs>
+    <!-- padrao de hachura diagonal, usado para sugerir sombra em tinta -->
+    <pattern id="hatch" width="5" height="5" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="0" x2="0" y2="5" stroke="#140d07" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <!-- casco -->
+  <path d="M70,6 C40,60 32,110 32,150 C32,175 50,188 70,190 C90,188 108,175 108,150 C108,110 100,60 70,6 Z"
+        fill="#9c6a3c" stroke="#14100a" stroke-width="3"/>
+
+  <!-- sombra em hachura (lado direito do casco) -->
+  <path d="M70,6 C100,60 108,110 108,150 C108,175 90,188 70,190 C88,185 82,175 82,150 C82,110 92,60 70,6 Z"
+        fill="url(#hatch)" opacity="0.4"/>
+
+  <!-- tabuas do casco -->
+  <path d="M46,70 C58,69 82,69 94,70" fill="none" stroke="#5c3c22" stroke-width="1.2" opacity="0.5"/>
+  <path d="M38,100 C58,99 82,99 102,100" fill="none" stroke="#5c3c22" stroke-width="1.2" opacity="0.5"/>
+  <path d="M34,130 C58,129 82,129 106,130" fill="none" stroke="#5c3c22" stroke-width="1.2" opacity="0.5"/>
+  <path d="M36,160 C58,159 82,159 104,160" fill="none" stroke="#5c3c22" stroke-width="1.2" opacity="0.5"/>
+  <path d="M46,182 C58,181 82,181 94,182" fill="none" stroke="#5c3c22" stroke-width="1.2" opacity="0.5"/>
+
+  <!-- mastro -->
+  <line x1="70" y1="12" x2="70" y2="150" stroke="#241608" stroke-width="4"/>
+
+  <!-- vergas (madeiras que sustentam as velas latinas) -->
+  <line x1="70" y1="24" x2="20" y2="90" stroke="#1c130a" stroke-width="2"/>
+  <line x1="70" y1="24" x2="120" y2="90" stroke="#1c130a" stroke-width="2"/>
+
+  <!-- vela esquerda -->
+  <path d="M70,20 C48,38 26,62 20,90 L70,112 Z" fill="#f1e4bf" stroke="#1c130a" stroke-width="2"/>
+  <path d="M55,55 C48,68 43,80 40,92 L55,98 Z" fill="url(#hatch)" opacity="0.22"/>
+
+  <!-- vela direita, com a Cruz da Ordem de Cristo — simbolo classico das
+       caravelas portuguesas do periodo das Grandes Navegacoes -->
+  <path d="M70,20 C92,38 114,62 120,90 L70,112 Z" fill="#f6ecc8" stroke="#1c130a" stroke-width="2"/>
+  <path d="M85,55 C92,68 97,80 100,92 L85,98 Z" fill="url(#hatch)" opacity="0.22"/>
+  <rect x="92" y="65" width="22" height="7" fill="#a7332a" stroke="#3a0f0c" stroke-width="1"/>
+  <rect x="100" y="53" width="7" height="32" fill="#a7332a" stroke="#3a0f0c" stroke-width="1"/>
+
+  <!-- flamula no topo do mastro -->
+  <path d="M70,8 L70,20 L90,14 Z" fill="#a7332a" stroke="#3a0f0c" stroke-width="1"/>
+
+  <!-- esteira de espuma na popa -->
+  <path d="M52,184 C58,190 64,190 68,186" fill="none" stroke="#eef2f0" stroke-width="1.6" opacity="0.5"/>
+  <path d="M72,186 C76,190 82,190 88,184" fill="none" stroke="#eef2f0" stroke-width="1.6" opacity="0.5"/>
+</svg>
