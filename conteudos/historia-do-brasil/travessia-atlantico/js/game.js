@@ -2079,16 +2079,22 @@ class GameScene extends Phaser.Scene {
   }
 
   addFullscreenButton() {
-    const btn = makeText(this, GAME.width - 42, 20, 'Tela cheia', { size: '14px', color: '#f6ecc8', depth: 80 })
-      .setOrigin(1, 0).setInteractive({ useHandCursor: true });
-    btn.on('pointerdown', () => {
+    const routeLeft = GAME.width - 76;
+    const gap = 12;
+    const width = 128;
+    const height = 42;
+    const x = routeLeft - gap - width;
+    const y = 20;
+
+    const btn = makeButton(this, x, y, width, height, 'TELA CHEIA', () => {
       try {
         if (this.scale.isFullscreen) this.scale.stopFullscreen();
         else this.scale.startFullscreen();
       } catch (err) {
         // Fullscreen e opcional; se o navegador bloquear, o jogo continua.
       }
-    });
+    }, 100);
+    btn.txt.setFontSize('13px');
   }
 
   // As funcoes abaixo traduzem em regras de jogo o conceito central do
