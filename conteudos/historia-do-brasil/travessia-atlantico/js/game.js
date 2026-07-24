@@ -13,9 +13,8 @@
 //   constava nos mapas â€” o futuro Brasil.
 //
 // Arquitetura do arquivo:
-//   BootScene    -> gera todas as texturas do jogo em tempo de execucao
-//                   (nao ha nenhuma imagem externa: tudo e vetorial,
-//                   desenhado via Phaser.Graphics, no estilo HQ historica)
+//   BootScene    -> carrega os assets enviados e gera as texturas vetoriais
+//                   complementares via Phaser.Graphics
 //   MenuScene    -> tela inicial (ja inclui tutorial de controles)
 //   GameScene    -> minigame principal: travessia vertical do Atlantico
 //   FailureScene -> tela de fracasso
@@ -57,6 +56,17 @@ window.addEventListener('unhandledrejection', (event) => {
   const reason = event.reason;
   showFriendlyError(reason && reason.message ? reason.message : String(reason));
 });
+
+// Resolve os assets a partir da pasta real de game.js, e nao da URL da
+// pagina que o carregou. Isso permite executar o minigame tanto pelo seu
+// index.html quanto dentro de outra rota/pagina do projeto principal.
+const GAME_SCRIPT_URL = document.currentScript && document.currentScript.src
+  ? document.currentScript.src
+  : window.location.href;
+const ASSET_BASE_URL = new URL('../assets/', GAME_SCRIPT_URL);
+function assetUrl(relativePath) {
+  return new URL(relativePath, ASSET_BASE_URL).href;
+}
 
 // ---------------------------------------------------------------------
 // Constantes globais do jogo
@@ -197,6 +207,152 @@ class SimpleSfx {
 }
 
 const SFX = new SimpleSfx();
+
+// ---------------------------------------------------------------------
+// Ambientes e efeitos gravados enviados para o projeto. O sintetizador
+// SimpleSfx continua como retorno imediato/fallback, enquanto estes sons
+// acrescentam mar, vento, chuva e trovao reais em volume moderado.
+// ---------------------------------------------------------------------
+const AUDIO_KEYS = {
+  calmSea: 'audio-mar-calmado',
+  roughSea: 'audio-mar-agitado',
+  wind: 'audio-vento',
+  coldWind: 'audio-vento-frio',
+  thunder: 'audio-trovao',
+  rain: 'audio-chuva',
+  calmRain: 'audio-chuva-calma',
+  gull: 'audio-gaivota',
+  distantGulls: 'audio-gaivotas-distantes'
+};
+
+class GameAudio {
+  constructor() {
+    this.sounds = {};
+    this.mode = 'silent';
+    this.rainMode = 'none';
+  }
+
+  bind(scene) {
+    if (!scene || !scene.sound || !scene.cache || !scene.cache.audio) return;
+    const definitions = [
+      [AUDIO_KEYS.calmSea, { loop: true, volume: 0.16 }],
+      [AUDIO_KEYS.roughSea, { loop: true, volume: 0.17 }],
+      [AUDIO_KEYS.rain, { loop: true, volume: 0.12 }],
+      [AUDIO_KEYS.calmRain, { loop: true, volume: 0.075 }],
+      [AUDIO_KEYS.distantGulls, { loop: true, volume: 0.05 }]
+    ];
+    definitions.forEach(([key, config]) => {
+      if (!this.sounds[key] && scene.cache.audio.exists(key)) {
+        this.sounds[key] = scene.sound.add(key, config);
+      }
+    });
+  }
+
+  stop(key) {
+    const sound = this.sounds[key];
+    if (sound && sound.isPlaying) sound.stop();
+  }
+
+  playLoop(key, volume) {
+    const sound = this.sounds[key];
+    if (!sound) return;
+    sound.setVolume(volume);
+    if (!sound.isPlaying) sound.play();
+  }
+
+  stopRain() {
+    this.stop(AUDIO_KEYS.rain);
+    this.stop(AUDIO_KEYS.calmRain);
+    this.rainMode = 'none';
+  }
+
+  applyMode(scene) {
+    if (!scene || !scene.sound || scene.sound.locked) return false;
+    this.bind(scene);
+    if (this.mode === 'menu' || this.mode === 'calm') {
+      this.stop(AUDIO_KEYS.roughSea);
+      this.playLoop(AUDIO_KEYS.calmSea, this.mode === 'menu' ? 0.16 : 0.12);
+      this.playLoop(AUDIO_KEYS.distantGulls, this.mode === 'menu' ? 0.045 : 0.055);
+    } else if (this.mode === 'gameplay') {
+      this.stop(AUDIO_KEYS.calmSea);
+      this.stop(AUDIO_KEYS.distantGulls);
+      this.playLoop(AUDIO_KEYS.roughSea, 0.17);
+    } else {
+      this.stop(AUDIO_KEYS.calmSea);
+      this.stop(AUDIO_KEYS.roughSea);
+      this.stop(AUDIO_KEYS.distantGulls);
+    }
+    return true;
+  }
+
+  setMode(scene, mode) {
+    this.mode = mode;
+    if (mode !== 'gameplay') this.stopRain();
+    if (this.applyMode(scene)) return;
+
+    // No primeiro acesso, navegadores so liberam audio depois de um gesto.
+    const unlock = () => {
+      if (this.mode === mode) this.applyMode(scene);
+    };
+    if (scene && scene.input) scene.input.once('pointerdown', unlock);
+    if (scene && scene.input && scene.input.keyboard) scene.input.keyboard.once('keydown', unlock);
+  }
+
+  enterMenu(scene) { this.setMode(scene, 'menu'); }
+  enterGameplay(scene) { this.setMode(scene, 'gameplay'); }
+  enterCalm(scene) { this.setMode(scene, 'calm'); }
+  enterSilent(scene) { this.setMode(scene, 'silent'); }
+
+  effect(scene, key, volume, maxDurationMs = 0) {
+    if (!scene || !scene.sound || scene.sound.locked || !scene.cache || !scene.cache.audio) return;
+    if (!scene.cache.audio.exists(key)) return;
+    const sound = scene.sound.add(key, { volume });
+    let cleaned = false;
+    const cleanup = () => {
+      if (cleaned) return;
+      cleaned = true;
+      if (sound.isPlaying) sound.stop();
+      sound.destroy();
+    };
+    sound.once('complete', cleanup);
+    scene.events.once('shutdown', cleanup);
+    sound.play();
+    if (maxDurationMs > 0) scene.time.delayedCall(maxDurationMs, cleanup);
+  }
+
+  setRain(scene, weatherRain, inStorm) {
+    const wanted = inStorm ? 'storm' : (weatherRain ? 'calm' : 'none');
+    if (this.mode !== 'gameplay') {
+      this.stopRain();
+      return;
+    }
+    if (!scene || !scene.sound || scene.sound.locked) {
+      this.rainMode = 'pending';
+      return;
+    }
+    this.bind(scene);
+    if (wanted === this.rainMode) return;
+    this.stop(AUDIO_KEYS.rain);
+    this.stop(AUDIO_KEYS.calmRain);
+    this.rainMode = wanted;
+    if (wanted === 'storm') this.playLoop(AUDIO_KEYS.rain, 0.12);
+    if (wanted === 'calm') this.playLoop(AUDIO_KEYS.calmRain, 0.075);
+  }
+}
+
+const GAME_AUDIO = new GameAudio();
+
+// GIFs nao animam de forma confiavel dentro da textura Canvas do Phaser.
+// Os quadros enviados foram empacotados em spritesheets; estes nomes
+// apontam para a animacao quando disponivel e para um frame seguro se nao.
+const VISUAL_ASSETS = {
+  wave: 'giant-wave',
+  whirlpool: 'whirlpool-original'
+};
+const ASSET_ANIMATIONS = {
+  wave: 'wave-motion',
+  whirlpool: 'whirlpool-motion'
+};
 
 const COLORS = {
   ink: 0x1e1a12,
@@ -353,22 +509,76 @@ function makeButton(scene, x, y, w, h, label, callback, depth = 40) {
 }
 
 // =====================================================================
-// BootScene â€” gera todas as texturas do jogo (nenhuma imagem externa;
-// tudo desenhado via Phaser.Graphics no estilo Historical Comic Art)
+// BootScene â€” carrega os assets enviados e gera as texturas restantes
+// via Phaser.Graphics no estilo Historical Comic Art
 // =====================================================================
 class BootScene extends Phaser.Scene {
   constructor() { super('BootScene'); }
 
   preload() {
-    this.load.image('whirlpool', 'assets/redemoinho-ai.png');
+    // O PNG antigo permanece como fallback, preservando a versao que ja
+    // tinha o redemoinho correto caso um navegador nao carregue o asset novo.
+    this.load.image('whirlpool-original', assetUrl('redemoinho-original.png'));
+    this.load.image('whirlpool-frame', assetUrl('img/redemoinho-frame.png'));
+    this.load.image('wave-frame', assetUrl('img/onda-frame.png'));
+    this.load.spritesheet('whirlpool-animated', assetUrl('img/redemoinho-spritesheet.png'), {
+      frameWidth: 230,
+      frameHeight: 230,
+      endFrame: 24
+    });
+    this.load.spritesheet('wave-animated', assetUrl('img/onda-spritesheet.png'), {
+      frameWidth: 280,
+      frameHeight: 280,
+      endFrame: 24
+    });
+
+    this.load.audio(AUDIO_KEYS.calmSea, assetUrl('audio/mar-calmado.mp3'));
+    this.load.audio(AUDIO_KEYS.roughSea, assetUrl('audio/mar-agitado.mp3'));
+    this.load.audio(AUDIO_KEYS.wind, assetUrl('audio/vento.mp3'));
+    this.load.audio(AUDIO_KEYS.coldWind, assetUrl('audio/vento-frio.mp3'));
+    this.load.audio(AUDIO_KEYS.thunder, assetUrl('audio/trovao.mp3'));
+    this.load.audio(AUDIO_KEYS.rain, assetUrl('audio/chuva.mp3'));
+    this.load.audio(AUDIO_KEYS.calmRain, assetUrl('audio/chuva-calma.mp3'));
+    this.load.audio(AUDIO_KEYS.gull, assetUrl('audio/gaivota.mp3'));
+    this.load.audio(AUDIO_KEYS.distantGulls, assetUrl('audio/gaivotas-distantes.mp3'));
   }
 
   create() {
     try {
       this.buildTextures();
+      this.prepareMedia();
       this.scene.start('MenuScene');
     } catch (err) {
       showFriendlyError(err && err.message ? err.message : String(err));
+    }
+  }
+
+  prepareMedia() {
+    const animatedWhirlpool = this.textures.exists('whirlpool-animated');
+    const animatedWave = this.textures.exists('wave-animated');
+
+    VISUAL_ASSETS.whirlpool = animatedWhirlpool
+      ? 'whirlpool-animated'
+      : (this.textures.exists('whirlpool-frame') ? 'whirlpool-frame' : 'whirlpool-original');
+    VISUAL_ASSETS.wave = animatedWave
+      ? 'wave-animated'
+      : (this.textures.exists('wave-frame') ? 'wave-frame' : 'giant-wave');
+
+    if (animatedWhirlpool && !this.anims.exists(ASSET_ANIMATIONS.whirlpool)) {
+      this.anims.create({
+        key: ASSET_ANIMATIONS.whirlpool,
+        frames: this.anims.generateFrameNumbers('whirlpool-animated', { start: 0, end: 24 }),
+        frameRate: 10,
+        repeat: -1
+      });
+    }
+    if (animatedWave && !this.anims.exists(ASSET_ANIMATIONS.wave)) {
+      this.anims.create({
+        key: ASSET_ANIMATIONS.wave,
+        frames: this.anims.generateFrameNumbers('wave-animated', { start: 0, end: 24 }),
+        frameRate: 5,
+        repeat: -1
+      });
     }
   }
 
@@ -689,30 +899,74 @@ class BootScene extends Phaser.Scene {
     g.beginPath(); g.moveTo(34, 54); g.lineTo(58, 44); g.lineTo(84, 58); g.strokePath();
     g.generateTexture('rock', 120, 112);
 
-    // -----------------------------------------------------------------
-    // REDEMOINHO: massa circular escura com espirais de espuma em
-    // perspectiva. A leitura precisa ser imediata: agua sugada para um
-    // centro perigoso, nao um icone abstrato.
-    // -----------------------------------------------------------------
-    if (!this.textures.exists('whirlpool')) {
-      g.clear();
-      g.fillStyle(0x000711, 0.34);
-      g.fillEllipse(110, 120, 188, 132);
-      g.fillStyle(0x021525, 0.96);
-      g.fillEllipse(110, 108, 184, 142);
-      g.fillStyle(0x0d4c62, 0.68);
-      g.fillEllipse(110, 108, 150, 110);
-      g.fillStyle(0x167f91, 0.38);
-      g.fillEllipse(110, 108, 116, 82);
+    // Pedra pequena e pontuda: silhueta mais estreita, boa para alternar
+    // a leitura dos perigos sem transformar todas as pedras no mesmo bloco.
+    g.clear();
+    g.fillStyle(0xdfe9ee, 0.16);
+    g.fillCircle(48, 46, 42);
+    g.beginPath();
+    g.moveTo(49, 4);
+    g.lineTo(78, 24);
+    g.lineTo(88, 58);
+    g.lineTo(61, 86);
+    g.lineTo(25, 79);
+    g.lineTo(8, 51);
+    g.lineTo(23, 18);
+    g.closePath();
+    g.fillStyle(0x4b5150, 1);
+    g.fillPath();
+    g.lineStyle(3, 0x171919, 0.9);
+    g.strokePath();
+    g.fillStyle(0x858c88, 0.78);
+    g.fillTriangle(23, 19, 49, 5, 42, 42);
+    g.fillStyle(0x303534, 0.76);
+    g.fillTriangle(55, 39, 79, 25, 70, 61);
+    g.generateTexture('rock-small', 96, 92);
 
-      const drawWhirlpoolArm = (offset, width, color, alpha, radiusStart, radiusEnd, squash = 0.78) => {
+    // Afloramento grande: tres massas irregulares formam uma pedra mais
+    // larga, com espuma ao redor. Continua fatal, mas usa hitbox menor que
+    // o desenho para permanecer justo.
+    g.clear();
+    g.fillStyle(0xdfe9ee, 0.17);
+    g.fillEllipse(90, 80, 174, 98);
+    g.lineStyle(3, 0xdfe9ee, 0.38);
+    g.strokeEllipse(90, 80, 164, 88);
+    g.fillStyle(0x424746, 1);
+    g.fillTriangle(8, 94, 43, 30, 86, 101);
+    g.fillTriangle(46, 102, 93, 8, 136, 104);
+    g.fillTriangle(106, 104, 149, 35, 176, 105);
+    g.lineStyle(3, 0x151717, 0.88);
+    g.strokeTriangle(8, 94, 43, 30, 86, 101);
+    g.strokeTriangle(46, 102, 93, 8, 136, 104);
+    g.strokeTriangle(106, 104, 149, 35, 176, 105);
+    g.fillStyle(0x818884, 0.78);
+    g.fillTriangle(64, 65, 93, 10, 99, 67);
+    g.fillStyle(0x2d3130, 0.72);
+    g.fillTriangle(111, 75, 149, 36, 150, 92);
+    g.generateTexture('rock-large', 184, 118);
+
+    // O redemoinho original continua dentro do projeto como fallback. Se
+    // nenhum arquivo externo for encontrado, geramos uma versao de
+    // seguranca por codigo para o jogo nunca travar na inicializacao.
+    if (!this.textures.exists('whirlpool-original') &&
+        !this.textures.exists('whirlpool-frame') &&
+        !this.textures.exists('whirlpool-animated')) {
+      g.clear();
+      g.fillStyle(0x03101b, 0.86);
+      g.fillCircle(110, 110, 102);
+      g.fillStyle(0x0b3548, 0.92);
+      g.fillCircle(110, 110, 84);
+      g.fillStyle(0x020711, 1);
+      g.fillCircle(110, 110, 28);
+
+      const drawFallbackArm = (offset, width, color, alpha) => {
         g.lineStyle(width, color, alpha);
         g.beginPath();
         for (let step = 0; step <= 1.001; step += 0.035) {
           const angle = offset + step * Math.PI * 2.25;
-          const radius = Phaser.Math.Linear(radiusStart, radiusEnd, step);
+          const radius = Phaser.Math.Linear(92, 12, step);
           const x = 110 + Math.cos(angle) * radius;
-          const y = 108 + Math.sin(angle) * radius * squash;
+          const y = 110 + Math.sin(angle) * radius;
           if (step === 0) g.moveTo(x, y);
           else g.lineTo(x, y);
         }
@@ -720,36 +974,13 @@ class BootScene extends Phaser.Scene {
       };
 
       [0, 2.1, 4.2].forEach((offset) => {
-        drawWhirlpoolArm(offset, 14, 0x020914, 0.48, 88, 15);
-        drawWhirlpoolArm(offset + 0.08, 8, 0x52d5e6, 0.86, 82, 12);
-        drawWhirlpoolArm(offset + 0.18, 4, 0xecffff, 0.82, 72, 8);
+        drawFallbackArm(offset, 13, 0x071421, 0.62);
+        drawFallbackArm(offset + 0.08, 7, 0x78c8d5, 0.86);
+        drawFallbackArm(offset + 0.16, 3, 0xe4f8fb, 0.74);
       });
-
-      g.lineStyle(4, 0xbaf3fa, 0.58);
-      g.strokeEllipse(110, 108, 178, 132);
-      g.lineStyle(2, 0xffefae, 0.45);
-      g.strokeEllipse(110, 108, 198, 148);
-      g.lineStyle(2, 0xffffff, 0.42);
-      [[32, 75, 58, 52, 88, 62], [132, 48, 166, 60, 178, 91], [44, 142, 78, 158, 112, 146], [127, 150, 156, 136, 181, 151]].forEach(([x0, y0, cx, cy, x1, y1]) => {
-        g.beginPath();
-        g.moveTo(x0, y0);
-        quadraticCurveTo(g, x0, y0, cx, cy, x1, y1, 12);
-        g.strokePath();
-      });
-
-      g.fillStyle(0x02070c, 1);
-      g.fillEllipse(110, 108, 48, 36);
-      g.fillStyle(0x000000, 0.72);
-      g.fillEllipse(110, 110, 28, 22);
-      g.lineStyle(5, 0x72d7e5, 0.76);
-      g.strokeEllipse(110, 108, 60, 44);
-      g.fillStyle(0xffffff, 0.82);
-      g.fillCircle(64, 54, 5);
-      g.fillCircle(165, 80, 4);
-      g.fillCircle(70, 149, 3);
-      g.fillCircle(143, 147, 3);
-      g.fillCircle(190, 114, 3);
-      g.generateTexture('whirlpool', 220, 220);
+      g.lineStyle(4, 0x8ad7e1, 0.72);
+      g.strokeCircle(110, 110, 98);
+      g.generateTexture('whirlpool-original', 220, 220);
     }
 
 
@@ -1086,105 +1317,270 @@ class MenuScene extends Phaser.Scene {
   constructor() { super('MenuScene'); }
 
   create() {
+    this.cameras.main.fadeIn(520, 3, 10, 16);
+    GAME_AUDIO.enterMenu(this);
     new AmbientBackdrop(this);
-    drawComicFrame(this);
-    const startRun = () => this.scene.start('GameScene');
+
+    // O mar do menu usa as mesmas texturas animadas da travessia. Isso faz
+    // a capa da HQ parecer parte do jogo, em vez de uma tela desconectada.
+    const menuSwell = this.add.tileSprite(640, 410, 1280, 620, 'water-swell')
+      .setDepth(1).setAlpha(0.24);
+    const menuWater = this.add.tileSprite(640, 420, 1280, 600, 'water-tile')
+      .setDepth(2).setAlpha(0.18);
+    const menuReflections = this.add.tileSprite(640, 430, 1280, 580, 'water-reflect')
+      .setDepth(3).setAlpha(0.15);
+    const menuFoam = this.add.tileSprite(640, 448, 1280, 540, 'foam-tile')
+      .setDepth(4).setAlpha(0.10);
+
+    const animateMenuSea = (_time, delta) => {
+      const dt = delta / 16.67;
+      menuSwell.tilePositionY -= 0.22 * dt;
+      menuSwell.tilePositionX += 0.06 * dt;
+      menuWater.tilePositionY -= 0.38 * dt;
+      menuWater.tilePositionX -= 0.12 * dt;
+      menuReflections.tilePositionY -= 0.64 * dt;
+      menuReflections.tilePositionX += 0.18 * dt;
+      menuFoam.tilePositionY -= 0.92 * dt;
+    };
+    this.events.on('update', animateMenuSea);
+    this.events.once('shutdown', () => this.events.off('update', animateMenuSea));
+
+    // Vinheta superior: escurece a linha do horizonte para o titulo ganhar
+    // leitura sem esconder o movimento da agua.
+    const atmosphere = this.add.graphics().setDepth(5).setScrollFactor(0);
+    atmosphere.fillStyle(0x02070c, 0.62);
+    atmosphere.fillRect(0, 0, GAME.width, 142);
+    atmosphere.fillStyle(0xaa7d3a, 0.14);
+    atmosphere.fillRect(0, 136, GAME.width, 6);
+    atmosphere.fillStyle(0x02070c, 0.42);
+    atmosphere.fillRect(0, 548, GAME.width, 172);
+
+    const shadowedPaper = (x, y, w, h, depth = 12) => {
+      const shadow = this.add.graphics().setDepth(depth).setScrollFactor(0);
+      shadow.fillStyle(0x000000, 0.38);
+      shadow.fillRoundedRect(x + 8, y + 10, w, h, 16);
+      drawPaper(this, x, y, w, h, depth + 1, 0.97);
+    };
+
+    const makeKeycap = (x, y, label, w = 30, h = 26) => {
+      const g = this.add.graphics().setDepth(31).setScrollFactor(0);
+      g.fillStyle(0x21180f, 0.97);
+      g.fillRoundedRect(x, y, w, h, 5);
+      g.lineStyle(1.5, COLORS.bronze, 1);
+      g.strokeRoundedRect(x, y, w, h, 5);
+      makeText(this, x + w / 2, y + h / 2, label, {
+        size: '13px', style: 'bold', color: '#fff4cf', align: 'center', depth: 32
+      }).setOrigin(0.5);
+    };
+
+    let transitioning = false;
+    const goToScene = (sceneKey) => {
+      if (transitioning) return;
+      transitioning = true;
+      this.cameras.main.fadeOut(420, 3, 8, 13);
+      this.time.delayedCall(430, () => this.scene.start(sceneKey));
+    };
+    const startRun = () => goToScene('GameScene');
+
+    const makeMenuButton = (x, y, w, h, label, callback, primary = false) => {
+      const bg = this.add.graphics().setDepth(71).setScrollFactor(0);
+      const draw = (over = false, pressed = false) => {
+        bg.clear();
+        bg.fillStyle(0x000000, 0.34);
+        bg.fillRoundedRect(x + 5, y + 6, w, h, 10);
+        const base = primary ? (over ? 0xc39445 : 0xaa7d3a) : (over ? 0x4b351f : 0x241a10);
+        bg.fillStyle(base, 0.98);
+        bg.fillRoundedRect(x, y + (pressed ? 2 : 0), w, h, 10);
+        bg.lineStyle(primary ? 3 : 2, primary ? COLORS.cream : COLORS.bronze, 1);
+        bg.strokeRoundedRect(x, y + (pressed ? 2 : 0), w, h, 10);
+        bg.lineStyle(1, primary ? 0x3d2817 : 0xf6ecc8, 0.42);
+        bg.strokeRoundedRect(x + 6, y + 6 + (pressed ? 2 : 0), w - 12, h - 12, 6);
+      };
+      draw(false);
+      const txt = makeText(this, x + w / 2, y + h / 2, label, {
+        font: FONT_TITLE,
+        size: primary ? '20px' : '16px',
+        style: 'bold',
+        color: primary ? '#21180f' : '#fff4cf',
+        align: 'center',
+        depth: 73
+      }).setOrigin(0.5);
+      const hit = this.add.zone(x + w / 2, y + h / 2, w, h)
+        .setDepth(74).setScrollFactor(0).setInteractive({ useHandCursor: true });
+      hit.on('pointerover', () => draw(true));
+      hit.on('pointerout', () => draw(false));
+      hit.on('pointerdown', () => draw(true, true));
+      hit.on('pointerup', () => {
+        draw(true);
+        SFX.click();
+        callback();
+      });
+      return { bg, txt, hit };
+    };
+
     const params = new URLSearchParams(window.location.search);
     if (params.get('play') === '1') {
-      this.time.delayedCall(80, startRun);
+      this.time.delayedCall(120, startRun);
     }
 
-    // Cabeçalho curto, como a abertura de um capítulo de HQ.
-    makeText(this, 640, 34, 'CAPÍTULO 2  •  MARÇO DE 1500', {
-      font: FONT_TITLE, size: '14px', style: 'bold', color: '#d7bd78', align: 'center', depth: 10
+    // Cabecalho de capa: titulo completo pedido pelo professor e uma linha
+    // curta que situa o jogador antes do tutorial.
+    const chapterTag = this.add.graphics().setDepth(20).setScrollFactor(0);
+    chapterTag.fillStyle(0xaa7d3a, 0.96);
+    chapterTag.fillRoundedRect(510, 18, 260, 24, 4);
+    makeText(this, 640, 30, 'CAPÍTULO 2  •  MARÇO DE 1500', {
+      font: FONT_TITLE, size: '12px', style: 'bold', color: '#21180f', align: 'center', depth: 21
     }).setOrigin(0.5);
-    makeText(this, 640, 70, 'TRAVESSIA DO ATLÂNTICO', {
-      font: FONT_TITLE, size: '38px', style: 'bold', color: '#fff4cf', align: 'center', depth: 10
+    makeText(this, 640, 68, 'TRAVESSIA DO ATLÂNTICO – A VOLTA DO MAR', {
+      font: FONT_TITLE, size: '36px', style: 'bold', color: '#fff4cf', align: 'center', depth: 21
     }).setOrigin(0.5);
-    makeText(this, 640, 104, 'A Volta do Mar  •  Ventos, correntes e uma costa fora dos mapas', {
-      size: '17px', color: '#d8c99e', align: 'center', depth: 10
+    makeText(this, 640, 111, 'Ventos, correntes e uma costa que ainda não aparecia nos mapas europeus.', {
+      size: '15px', color: '#d8c99e', align: 'center', depth: 21
     }).setOrigin(0.5);
 
-    // Painel esquerdo: contexto histórico e rota visual da Volta do Mar.
-    drawPaper(this, 48, 128, 460, 444, 12, 0.96);
-    makeText(this, 78, 153, 'A MISSÃO', {
-      font: FONT_TITLE, size: '22px', style: 'bold', color: '#241a10', depth: 14
-    });
-    makeText(this, 78, 190,
-      'Depois de Cabo Verde, a esquadra de Cabral\n' +
-      'se afasta da costa africana. É a Volta do Mar:\n' +
-      'um grande desvio para oeste, em busca dos\n' +
-      'ventos e correntes do Atlântico.',
-      { size: '16px', color: '#2f2418', lineSpacing: 7, depth: 14 }
+    // Painel principal: contexto e mapa visual da rota.
+    shadowedPaper(40, 154, 710, 390);
+    const missionRibbon = this.add.graphics().setDepth(25).setScrollFactor(0);
+    missionRibbon.fillStyle(0x7d3f23, 1);
+    missionRibbon.fillRect(58, 172, 244, 34);
+    missionRibbon.fillTriangle(302, 172, 324, 189, 302, 206);
+    makeText(this, 74, 189, 'A MISSÃO  •  7.000 KM', {
+      font: FONT_TITLE, size: '15px', style: 'bold', color: '#fff4cf', depth: 26
+    }).setOrigin(0, 0.5);
+    makeText(this, 64, 222,
+      'Após Cabo Verde, a esquadra de Cabral se afasta da costa africana.\n' +
+      'A Volta do Mar busca ventos e correntes favoráveis, levando os navios\n' +
+      'para oeste — por águas desconhecidas e fora das rotas habituais.',
+      { size: '14px', color: '#2f2418', lineSpacing: 5, depth: 26 }
     );
 
-    const route = this.add.graphics().setDepth(14).setScrollFactor(0);
-    route.fillStyle(0x183f52, 0.13);
-    route.fillRoundedRect(76, 316, 404, 212, 12);
-    route.lineStyle(2, 0x7d5a28, 0.45);
-    route.strokeRoundedRect(76, 316, 404, 212, 12);
-    route.fillStyle(0x9a7a3f, 0.65);
-    route.fillCircle(125, 355, 8);
-    route.fillCircle(430, 478, 9);
-    // Rota pontilhada em arco: o desvio para oeste é a ideia central.
-    for (let i = 0; i <= 18; i++) {
-      const t = i / 18;
-      const x = 137 + 278 * t;
-      const y = 360 + 112 * t + Math.sin(t * Math.PI) * 66;
-      route.fillStyle(0x7d3f23, i % 2 ? 0.35 : 0.9);
-      route.fillCircle(x, y, i % 2 ? 2 : 3);
+    const map = this.add.graphics().setDepth(24).setScrollFactor(0);
+    map.fillStyle(0x173d50, 0.14);
+    map.fillRoundedRect(62, 302, 666, 218, 10);
+    map.lineStyle(2, 0x7d5a28, 0.42);
+    map.strokeRoundedRect(62, 302, 666, 218, 10);
+    // Hachuras e linhas de latitude imitam a gravura de um mapa nautico.
+    map.lineStyle(1, 0x5e4728, 0.16);
+    for (let y = 330; y <= 490; y += 40) map.lineBetween(76, y, 714, y);
+    for (let x = 120; x <= 680; x += 80) map.lineBetween(x, 314, x, 508);
+
+    // Massas de terra simplificadas: Africa a leste e costa desconhecida a
+    // oeste. A rota curva entre elas evidencia o desvio da Volta do Mar.
+    map.fillStyle(0x9a7a3f, 0.76);
+    map.fillTriangle(626, 318, 718, 342, 700, 506);
+    map.fillTriangle(626, 318, 650, 472, 700, 506);
+    map.fillStyle(0x6f7c48, 0.78);
+    map.fillTriangle(82, 460, 132, 368, 178, 504);
+    map.fillTriangle(96, 444, 168, 400, 178, 504);
+
+    map.lineStyle(4, 0x7d3f23, 0.88);
+    map.beginPath();
+    map.moveTo(620, 355);
+    quadraticCurveTo(map, 620, 355, 392, 500, 168, 432, 28);
+    map.strokePath();
+    for (let i = 0; i <= 12; i++) {
+      const t = i / 12;
+      const x = 620 * (1 - t) * (1 - t) + 2 * 390 * (1 - t) * t + 168 * t * t;
+      const y = 355 * (1 - t) * (1 - t) + 2 * 500 * (1 - t) * t + 432 * t * t;
+      map.fillStyle(i % 2 === 0 ? 0xf6ecc8 : 0x7d3f23, 0.96);
+      map.fillCircle(x, y, i % 2 === 0 ? 4 : 2);
     }
-    makeText(this, 98, 332, 'CABO VERDE', { size: '12px', style: 'bold', color: '#3b2a18', depth: 15 });
-    makeText(this, 368, 494, 'COSTA\nDESCONHECIDA', { size: '12px', style: 'bold', color: '#3b2a18', align: 'center', depth: 15 });
-    makeText(this, 165, 452, 'VOLTA DO MAR', { font: FONT_TITLE, size: '14px', style: 'bold', color: '#7d3f23', depth: 15 });
-    const menuShip = this.add.image(275, 402, 'caravela').setDepth(16).setScale(0.62).setAlpha(0.98).setAngle(18);
-    this.tweens.add({ targets: menuShip, y: 409, angle: 13, duration: 1800, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
-    makeText(this, 92, 542, 'OBJETIVO  •  Complete 7.000 km e alcance a costa.', {
-      size: '13px', style: 'bold', color: '#5b3b1e', depth: 15
+    map.fillStyle(0x3b2a18, 1);
+    map.fillCircle(620, 355, 6);
+    map.fillCircle(168, 432, 6);
+
+    makeText(this, 576, 326, 'CABO VERDE', { size: '11px', style: 'bold', color: '#3b2a18', depth: 27 });
+    makeText(this, 632, 482, 'ÁFRICA', { size: '12px', style: 'bold', color: '#3b2a18', depth: 27 });
+    makeText(this, 84, 472, 'COSTA\nDESCONHECIDA', { size: '11px', style: 'bold', color: '#27311e', align: 'center', depth: 27 });
+    makeText(this, 344, 452, 'VOLTA DO MAR', {
+      font: FONT_TITLE, size: '14px', style: 'bold', color: '#7d3f23', depth: 27
+    }).setAngle(-7);
+    const mapShip = this.add.image(395, 420, 'caravela-side')
+      .setDepth(28).setScale(0.36).setAngle(-6);
+    this.tweens.add({
+      targets: mapShip, y: 426, angle: -2, duration: 1700,
+      yoyo: true, repeat: -1, ease: 'Sine.easeInOut'
     });
 
-    // Painel direito: tutorial visual e legenda, legíveis numa só olhada.
-    drawPaper(this, 528, 128, 704, 444, 12, 0.96);
-    makeText(this, 560, 153, 'COMO NAVEGAR', {
-      font: FONT_TITLE, size: '22px', style: 'bold', color: '#241a10', depth: 14
-    });
-    const keycap = (x, y, label) => {
-      const g = this.add.graphics().setDepth(15).setScrollFactor(0);
-      g.fillStyle(0x241a10, 0.96); g.fillRoundedRect(x, y, 38, 34, 6);
-      g.lineStyle(2, COLORS.bronze, 1); g.strokeRoundedRect(x, y, 38, 34, 6);
-      makeText(this, x + 19, y + 17, label, { size: '16px', style: 'bold', color: '#fff4cf', align: 'center', depth: 16 }).setOrigin(0.5);
-    };
-    keycap(560, 198, '←'); keycap(604, 198, '↑'); keycap(648, 198, '→'); keycap(604, 238, '↓');
-    makeText(this, 704, 205, 'PC', { size: '12px', style: 'bold', color: '#7d3f23', depth: 15 });
-    makeText(this, 704, 224, 'Setas ou WASD', { size: '16px', style: 'bold', color: '#2f2418', depth: 15 });
-    makeText(this, 704, 247, 'Guie para os lados; o navio avança sozinho.', { size: '13px', color: '#4d3b27', depth: 15 });
-    makeText(this, 956, 205, 'CELULAR', { size: '12px', style: 'bold', color: '#7d3f23', depth: 15 });
-    makeText(this, 956, 226, '☝  Toque e arraste', { size: '16px', style: 'bold', color: '#2f2418', depth: 15 });
-    makeText(this, 956, 249, 'Jogue em modo paisagem.', { size: '13px', color: '#4d3b27', depth: 15 });
+    const compass = this.add.image(694, 474, 'compass-rose')
+      .setDepth(27).setDisplaySize(52, 52).setAlpha(0.72);
+    this.tweens.add({ targets: compass, angle: 5, duration: 2200, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
 
-    const divider = this.add.graphics().setDepth(14).setScrollFactor(0);
-    divider.lineStyle(2, 0x7d5a28, 0.45); divider.lineBetween(560, 290, 1200, 290);
-    makeText(this, 560, 308, 'LEGENDA DE BORDO', {
-      font: FONT_TITLE, size: '17px', style: 'bold', color: '#241a10', depth: 15
+    // Painel de bordo: controles visuais completos e todos os elementos do
+    // jogo em itens separados, sem agrupar neblina com onda ou pedras com
+    // tempestade.
+    shadowedPaper(770, 154, 468, 390);
+    makeText(this, 794, 174, 'DIÁRIO DE BORDO', {
+      font: FONT_TITLE, size: '19px', style: 'bold', color: '#241a10', depth: 30
+    });
+    makeText(this, 1198, 178, 'COMO NAVEGAR', {
+      size: '10px', style: 'bold', color: '#7d3f23', align: 'right', depth: 30
+    }).setOrigin(1, 0);
+
+    // WASD
+    makeKeycap(824, 205, 'W');
+    makeKeycap(791, 234, 'A'); makeKeycap(824, 234, 'S'); makeKeycap(857, 234, 'D');
+    makeText(this, 839, 269, 'WASD', { size: '10px', style: 'bold', color: '#5b3b1e', align: 'center', depth: 32 }).setOrigin(0.5);
+    // Setas
+    makeKeycap(949, 205, '↑');
+    makeKeycap(916, 234, '←'); makeKeycap(949, 234, '↓'); makeKeycap(982, 234, '→');
+    makeText(this, 964, 269, 'SETAS', { size: '10px', style: 'bold', color: '#5b3b1e', align: 'center', depth: 32 }).setOrigin(0.5);
+    // Toque
+    const touchBadge = this.add.graphics().setDepth(31).setScrollFactor(0);
+    touchBadge.fillStyle(0x183f52, 0.12);
+    touchBadge.fillRoundedRect(1058, 204, 144, 64, 9);
+    touchBadge.lineStyle(1.5, 0x7d5a28, 0.55);
+    touchBadge.strokeRoundedRect(1058, 204, 144, 64, 9);
+    makeText(this, 1072, 214, '☝', { size: '28px', color: '#2f2418', depth: 32 });
+    makeText(this, 1112, 214, 'TOQUE', { size: '12px', style: 'bold', color: '#2f2418', depth: 32 });
+    makeText(this, 1112, 235, 'e arraste', { size: '12px', color: '#5b3b1e', depth: 32 });
+    makeText(this, 794, 286, 'O navio avança sozinho. Guie para os lados e escolha uma rota segura.', {
+      size: '11px', color: '#4d3b27', depth: 32
+    });
+
+    const divider = this.add.graphics().setDepth(30).setScrollFactor(0);
+    divider.lineStyle(2, 0x7d5a28, 0.38);
+    divider.lineBetween(794, 312, 1212, 312);
+    makeText(this, 794, 323, 'LEGENDA DOS ELEMENTOS', {
+      font: FONT_TITLE, size: '14px', style: 'bold', color: '#241a10', depth: 32
     });
     const legend = [
-      { key: 'icon-wind', label: 'VENTO', note: 'ganha velocidade', x: 570, y: 360 },
-      { key: 'icon-current', label: 'CORRENTE', note: 'ganha velocidade', x: 870, y: 360 },
-      { key: 'giant-wave', label: 'ONDA / NEBLINA', note: 'desvia ou encobre', x: 570, y: 430 },
-      { key: 'icon-storm', label: 'TEMPESTADE / PEDRAS', note: 'perigo fatal', x: 870, y: 430 },
-      { key: 'whirlpool', label: 'REDEMOINHO', note: 'perigo fatal', x: 570, y: 500 }
+      { key: 'icon-wind', label: 'VENTO', note: '+ velocidade', x: 802, y: 360, good: true },
+      { key: 'icon-current', label: 'CORRENTE', note: '+ velocidade', x: 1014, y: 360, good: true },
+      { key: VISUAL_ASSETS.wave, animation: ASSET_ANIMATIONS.wave, label: 'ONDA', note: 'empurra', x: 802, y: 405 },
+      { key: 'fog-bank', label: 'NEBLINA', note: 'encobre', x: 1014, y: 405 },
+      { key: 'rock', label: 'PEDRAS', note: 'naufrágio', x: 802, y: 450, danger: true },
+      { key: VISUAL_ASSETS.whirlpool, animation: ASSET_ANIMATIONS.whirlpool, label: 'REDEMOINHO', note: 'naufrágio', x: 1014, y: 450, danger: true },
+      { key: 'icon-storm', label: 'TEMPESTADE', note: 'naufrágio', x: 802, y: 495, danger: true }
     ];
     legend.forEach((item) => {
-      const icon = this.add.image(item.x, item.y, item.key).setDepth(15).setScrollFactor(0);
-      if (item.key === 'giant-wave') icon.setDisplaySize(48, 30);
-      else if (item.key === 'icon-storm') icon.setDisplaySize(30, 38);
-      else icon.setDisplaySize(38, 38);
-      makeText(this, item.x + 34, item.y - 11, item.label, { size: '13px', style: 'bold', color: '#2f2418', depth: 15 });
-      makeText(this, item.x + 34, item.y + 8, item.note, { size: '12px', color: '#6c5130', depth: 15 });
+      const icon = this.add.sprite(item.x, item.y, item.key).setDepth(15).setScrollFactor(0);
+      if (item.animation && this.anims.exists(item.animation)) icon.play(item.animation);
+      if (item.animation === ASSET_ANIMATIONS.wave) icon.setDisplaySize(34, 34);
+      else if (item.key === 'fog-bank') icon.setDisplaySize(34, 23);
+      else if (item.key === 'icon-storm') icon.setDisplaySize(23, 29);
+      else if (item.key === 'rock') icon.setDisplaySize(30, 26);
+      else icon.setDisplaySize(28, 28);
+      makeText(this, item.x + 25, item.y - 12, item.label, {
+        size: '11px', style: 'bold', color: '#2f2418', depth: 33
+      });
+      makeText(this, item.x + 25, item.y + 5, item.note, {
+        size: '10px', style: item.danger ? 'bold' : 'normal',
+        color: item.danger ? '#8c321f' : (item.good ? '#34643f' : '#6c5130'), depth: 33
+      });
     });
+    const lifeSeal = this.add.graphics().setDepth(31).setScrollFactor(0);
+    lifeSeal.fillStyle(0x7d3f23, 0.12);
+    lifeSeal.fillRoundedRect(1002, 482, 204, 38, 8);
+    lifeSeal.lineStyle(1.5, 0x7d3f23, 0.65);
+    lifeSeal.strokeRoundedRect(1002, 482, 204, 38, 8);
+    makeText(this, 1104, 501, '⚠  UMA VIDA  •  EVITE OS PERIGOS', {
+      size: '10px', style: 'bold', color: '#7d3f23', align: 'center', depth: 33
+    }).setOrigin(0.5);
 
-    makeButton(this, 210, 602, 420, 62, 'JOGAR  •  ANCORAS FORA!', startRun);
-    makeButton(this, 652, 610, 260, 50, 'TELA CHEIA', () => {
+    // Faixa de acoes: o botao Jogar tem maior contraste e hierarquia.
+    makeMenuButton(214, 574, 430, 64, 'JOGAR  •  ÂNCORAS FORA!', startRun, true);
+    const fullscreenButton = makeMenuButton(670, 582, 258, 50, '⛶  TELA CHEIA', () => {
       try {
         if (this.scale.isFullscreen) this.scale.stopFullscreen();
         else this.scale.startFullscreen();
@@ -1192,12 +1588,28 @@ class MenuScene extends Phaser.Scene {
         // Alguns navegadores bloqueiam fullscreen fora de contexto permitido.
       }
     });
-    makeButton(this, 934, 610, 180, 50, 'CRÉDITOS', () => this.scene.start('CreditsScene'));
-    makeText(this, 640, 691, 'ENTER / ESPAÇO para jogar  •  Uma vida: escolha sua rota com cuidado.', {
-      size: '12px', color: '#cdbf94', depth: 20, align: 'center'
+    makeMenuButton(954, 582, 178, 50, 'CRÉDITOS', () => goToScene('CreditsScene'));
+
+    const updateFullscreenLabel = () => {
+      fullscreenButton.txt.setText(this.scale.isFullscreen ? '⛶  SAIR DA TELA' : '⛶  TELA CHEIA');
+    };
+    document.addEventListener('fullscreenchange', updateFullscreenLabel);
+    document.addEventListener('webkitfullscreenchange', updateFullscreenLabel);
+    this.events.once('shutdown', () => {
+      document.removeEventListener('fullscreenchange', updateFullscreenLabel);
+      document.removeEventListener('webkitfullscreenchange', updateFullscreenLabel);
+    });
+
+    makeText(this, 640, 669, 'ENTER / ESPAÇO PARA JOGAR   •   MODO PAISAGEM RECOMENDADO NO CELULAR', {
+      size: '11px', style: 'bold', color: '#d8c99e', depth: 72, align: 'center'
     }).setOrigin(0.5);
-    this.input.keyboard.once('keydown-ENTER', startRun);
-    this.input.keyboard.once('keydown-SPACE', startRun);
+    makeText(this, 640, 693, 'Desvie dos perigos, aproveite os ventos e complete a Volta do Mar.', {
+      size: '11px', color: '#9fb8bf', depth: 72, align: 'center'
+    }).setOrigin(0.5);
+
+    drawComicFrame(this, 90);
+    this.input.keyboard.once('keydown-ENTER', () => { SFX.click(); startRun(); });
+    this.input.keyboard.once('keydown-SPACE', () => { SFX.click(); startRun(); });
   }
 }
 
@@ -1654,7 +2066,8 @@ class EventTrack {
       }
 
       const type = weightedTypes[Phaser.Math.Between(0, weightedTypes.length - 1)];
-      const w = { wind: 58, current: 58, wave: 150, fog: 230, rock: 96, whirlpool: 146 }[type];
+      // Reserva espaco para a maior variacao possivel de cada perigo.
+      const w = { wind: 58, current: 58, wave: 150, fog: 230, rock: 150, whirlpool: 188 }[type];
       const isHazard = type === 'rock' || type === 'whirlpool';
 
       let x;
@@ -1689,29 +2102,48 @@ class EventTrack {
     }
   }
 
-  // Vento e corrente sao itens PEQUENOS e coletaveis (icones) â€” precisa
-  // de pontaria para pegar. Pedra/redemoinho tambem sao pequenos, mas sao
-  // riscos fatais (naufragio), nao itens a coletar.
+  // Vento e corrente sao itens pequenos e coletaveis. Pedras e redemoinhos
+  // variam entre pequenos, medios e grandes, mas todos continuam fatais.
   spawnGate(worldY, type, x) {
+    const rockVariants = [
+      { key: 'rock-small', w: 72, h: 68, hitW: 48, hitH: 46, score: -10 },
+      { key: 'rock', w: 100, h: 94, hitW: 76, hitH: 72, score: -10 },
+      { key: 'rock-large', w: 150, h: 104, hitW: 106, hitH: 82, score: -10 }
+    ];
+    const whirlpoolSizes = [
+      { w: 108, h: 108, hitW: 66, hitH: 66 },
+      { w: 146, h: 146, hitW: 92, hitH: 92 },
+      { w: 188, h: 188, hitW: 116, hitH: 116 }
+    ];
+    const rockSpec = rockVariants[Phaser.Math.Between(0, rockVariants.length - 1)];
+    const whirlpoolSize = whirlpoolSizes[Phaser.Math.Between(0, whirlpoolSizes.length - 1)];
     const specs = {
       wind: { key: 'icon-wind', w: 58, h: 58, score: 12 },
       current: { key: 'icon-current', w: 58, h: 58, score: 14 },
-      wave: { key: 'giant-wave', w: 150, h: 96, score: 0 },
+      wave: { key: VISUAL_ASSETS.wave, w: 150, h: 112, hitW: 132, hitH: 86, score: 0 },
       fog: { key: 'fog-bank', w: 230, h: 120, score: 0 },
-      rock: { key: 'rock', w: 96, h: 92, score: -10 },
-      whirlpool: { key: 'whirlpool', w: 146, h: 146, hitW: 92, hitH: 92, score: -10 }
+      rock: rockSpec,
+      whirlpool: { key: VISUAL_ASSETS.whirlpool, ...whirlpoolSize, score: -10 }
     };
     const spec = specs[type];
-    const sprite = this.scene.add.image(x, worldY, spec.key).setDepth(14).setDisplaySize(spec.w, spec.h);
+    const sprite = this.scene.add.sprite(x, worldY, spec.key).setDepth(14).setDisplaySize(spec.w, spec.h);
+    if (type === 'rock') sprite.setAngle(Phaser.Math.Between(-16, 16));
+    if (type === 'wave' && this.scene.anims.exists(ASSET_ANIMATIONS.wave)) {
+      sprite.play(ASSET_ANIMATIONS.wave);
+    }
     if (type === 'whirlpool') {
       sprite.setAlpha(0.94);
-      this.scene.tweens.add({
-        targets: sprite,
-        angle: 360,
-        duration: 3600,
-        repeat: -1,
-        ease: 'Linear'
-      });
+      if (this.scene.anims.exists(ASSET_ANIMATIONS.whirlpool)) {
+        sprite.play(ASSET_ANIMATIONS.whirlpool);
+      } else if (spec.key === 'whirlpool-original') {
+        this.scene.tweens.add({
+          targets: sprite,
+          angle: 360,
+          duration: 1900,
+          repeat: -1,
+          ease: 'Linear'
+        });
+      }
       this.scene.tweens.add({
         targets: sprite,
         alpha: 0.72,
@@ -1846,6 +2278,7 @@ class EventTrack {
         if (this.scene.time.now - storm.lastThunderAt > 1200) {
           storm.lastThunderAt = this.scene.time.now;
           SFX.thunder();
+          GAME_AUDIO.effect(this.scene, AUDIO_KEYS.thunder, 0.28, 5000);
         }
       }
 
@@ -1884,6 +2317,7 @@ class GameScene extends Phaser.Scene {
 
   create() {
     this.cameras.main.fadeIn(420);
+    GAME_AUDIO.enterGameplay(this);
     // OBS: nao usar cameras.main.setZoom() aqui â€” a HUD/UI inteira usa
     // scrollFactor(0) para ficar fixa na tela, mas isso NAO da imunidade
     // a zoom (zoom e uma transformacao da camera inteira, afeta tambem
@@ -1939,6 +2373,7 @@ class GameScene extends Phaser.Scene {
     this.buildWeatherBands();
     this.weatherBandIndex = 0;
     this.currentWeather = 'clear';
+    this.nextGullAt = Phaser.Math.Between(7000, 11000);
     this.weatherOverlay = this.add.graphics().setDepth(10).setScrollFactor(0).setAlpha(0);
     this.weatherOverlay.fillStyle(0x0a0f1a, 1);
     this.weatherOverlay.fillRect(0, 0, GAME.width, GAME.height);
@@ -1982,8 +2417,12 @@ class GameScene extends Phaser.Scene {
     let guard = 0;
     while (t < GAME.distanceTotal && guard < 30) {
       guard++;
-      const len = Phaser.Math.Between(1100, 1900);
-      this.weatherBands.push({ start: t, end: t + len, mood: moodCycle[moodIndex % moodCycle.length] });
+      const mood = moodCycle[moodIndex % moodCycle.length];
+      // A chuva agora permanece aproximadamente o dobro dos outros trechos.
+      const len = mood === 'rain'
+        ? Phaser.Math.Between(2600, 3500)
+        : Phaser.Math.Between(1100, 1900);
+      this.weatherBands.push({ start: t, end: t + len, mood });
       t += len;
       moodIndex++;
     }
@@ -2019,6 +2458,7 @@ class GameScene extends Phaser.Scene {
         }
       });
     }
+    GAME_AUDIO.setRain(this, mood === 'rain', this.inStorm);
   }
 
   updateRain(delta) {
@@ -2144,6 +2584,7 @@ class GameScene extends Phaser.Scene {
     this.windFlash = BOOST.durationMs;
     this.score += score;
     SFX.collect();
+    GAME_AUDIO.effect(this, AUDIO_KEYS.wind, 0.18, BOOST.durationMs);
     this.pulseShip();
   }
 
@@ -2153,6 +2594,7 @@ class GameScene extends Phaser.Scene {
     this.currentFlash = BOOST.durationMs;
     this.score += score;
     SFX.collect();
+    GAME_AUDIO.effect(this, AUDIO_KEYS.wind, 0.16, BOOST.durationMs);
     this.pulseShip();
   }
 
@@ -2166,6 +2608,7 @@ class GameScene extends Phaser.Scene {
   applyFog() {
     this.fogTimer = 3600;
     SFX.fog();
+    GAME_AUDIO.effect(this, AUDIO_KEYS.coldWind, 0.16, 3600);
     this.message.show('No Atlantico aberto, neblina e clima instavel tornavam a navegacao incerta.', 2200);
   }
 
@@ -2229,6 +2672,10 @@ class GameScene extends Phaser.Scene {
     // como uma mensagem passageira, ja que nao ha mais uma barra fixa
     // mostrando "Local:" o tempo todo.
     const p = Phaser.Math.Clamp(this.traveled / GAME.distanceTotal, 0, 1);
+    if (!this.arrived && p >= 0.76 && this.elapsed >= this.nextGullAt) {
+      GAME_AUDIO.effect(this, AUDIO_KEYS.gull, 0.15, 4800);
+      this.nextGullAt = this.elapsed + Phaser.Math.Between(9000, 15000);
+    }
     const stage = ROUTE_STAGES.reduce((last, cur, i) => (p >= cur.at ? i : last), 0);
     if (stage !== this.stageIndex) {
       this.stageIndex = stage;
@@ -2294,6 +2741,7 @@ class GameScene extends Phaser.Scene {
     if (this.finished) return;
     this.finished = true;
     SFX.danger();
+    GAME_AUDIO.enterSilent(this);
     this.cameras.main.shake(220, 0.01);
     this.cameras.main.fadeOut(500);
     this.time.delayedCall(520, () => {
@@ -2304,6 +2752,7 @@ class GameScene extends Phaser.Scene {
   win() {
     if (this.finished) return;
     this.finished = true;
+    GAME_AUDIO.enterCalm(this);
     this.cameras.main.fadeOut(600);
     this.time.delayedCall(620, () => {
       this.scene.start('ArrivalScene', {
@@ -2327,6 +2776,7 @@ class FailureScene extends Phaser.Scene {
   }
 
   create() {
+    GAME_AUDIO.enterSilent(this);
     new AmbientBackdrop(this, 0.55);
     drawComicFrame(this);
     drawPaper(this, 260, 108, 760, 420, 20);
@@ -2366,6 +2816,8 @@ class ArrivalScene extends Phaser.Scene {
 
   create() {
     this.cameras.main.fadeIn(450);
+    GAME_AUDIO.enterCalm(this);
+    GAME_AUDIO.effect(this, AUDIO_KEYS.gull, 0.17, 5000);
 
     const sea = this.add.graphics().setDepth(0);
     sea.fillStyle(0x0a2c3b, 1);
@@ -2451,6 +2903,7 @@ class VictoryScene extends Phaser.Scene {
   }
 
   create() {
+    GAME_AUDIO.enterCalm(this);
     new AmbientBackdrop(this, 0.9);
     drawComicFrame(this);
     const coast = this.add.image(GAME.width / 2, 176, 'coastline')
@@ -2499,22 +2952,28 @@ class CreditsScene extends Phaser.Scene {
   constructor() { super('CreditsScene'); }
 
   create() {
+    GAME_AUDIO.enterMenu(this);
+    this.cameras.main.fadeIn(420, 3, 10, 16);
     new AmbientBackdrop(this, 0.6);
     drawComicFrame(this);
     drawPaper(this, 320, 120, 640, 440, 20);
 
-    makeText(this, 356, 152, 'CREDITOS', { font: FONT_TITLE, size: '28px', style: 'bold', color: '#241a10', depth: 22 });
+    makeText(this, 356, 152, 'CRÉDITOS', { font: FONT_TITLE, size: '28px', style: 'bold', color: '#241a10', depth: 22 });
     makeText(this, 356, 210,
       'Serious Game - Descobrimento do Brasil\n' +
-      'Instituto Federal do Para (IFPA)\n\n' +
-      'Capitulo 2: A Travessia do Atlantico e o Desvio\n' +
-      '(Marco e Abril de 1500)\n\n' +
+      'Instituto Federal do Pará (IFPA)\n\n' +
+      'Capítulo 2: A Travessia do Atlântico e o Desvio\n' +
+      '(Março e Abril de 1500)\n\n' +
       'Tecnologias: HTML5, CSS3, JavaScript, Phaser 3\n' +
-      'Estilo visual: Historical Comic Art',
+      'Estilo visual: Historical Comic Art\n' +
+      'Ambientes, efeitos e GIFs: assets fornecidos pelo usuario',
       { size: '18px', color: '#2f2418', wrap: 560, lineSpacing: 10, depth: 22 }
     );
 
-    makeButton(this, 356, 480, 240, 54, 'VOLTAR AO MENU', () => this.scene.start('MenuScene'));
+    makeButton(this, 356, 480, 240, 54, 'VOLTAR AO MENU', () => {
+      this.cameras.main.fadeOut(360, 3, 8, 13);
+      this.time.delayedCall(370, () => this.scene.start('MenuScene'));
+    });
   }
 }
 

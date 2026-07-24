@@ -34,7 +34,8 @@ html, body {
   justify-content: center;
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   background:
-    radial-gradient(circle at 22% 12%, rgba(224, 196, 130, 0.14), transparent 28%),
+    radial-gradient(circle at 22% 12%, rgba(224, 196, 130, 0.16), transparent 28%),
+    radial-gradient(circle at 78% 86%, rgba(32, 90, 104, 0.18), transparent 32%),
     linear-gradient(180deg, #0a1c2a 0%, #050d16 100%);
 }
 
@@ -46,6 +47,20 @@ html, body {
   height: auto;
   image-rendering: auto;
   touch-action: none;
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.52);
+}
+
+#game-container:fullscreen,
+#game-container:-webkit-full-screen {
+  width: 100vw;
+  height: 100vh;
+  padding: 0;
+  background: #030a10;
+}
+
+#game-container:fullscreen canvas,
+#game-container:-webkit-full-screen canvas {
+  box-shadow: none;
 }
 
 #orientation-warning {

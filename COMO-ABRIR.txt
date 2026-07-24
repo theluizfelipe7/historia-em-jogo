@@ -1,0 +1,6 @@
+1. Extraia o ZIP inteiro antes de abrir o jogo.
+2. Não abra o arquivo HTML enquanto ele ainda estiver dentro do ZIP.
+3. Entre na pasta historia-em-jogo extraída.
+4. Abra o arquivo ABRIR-TRAVESSIA.html.
+
+Todos os arquivos da pasta assets precisam permanecer junto com o jogo.

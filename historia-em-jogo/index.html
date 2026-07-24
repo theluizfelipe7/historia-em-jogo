@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#142f3b">
+  <title>História em Jogo — Aprenda vivendo a história</title>
+  <meta name="description" content="Sistema educativo com histórias interativas, cenas ilustradas e minigames.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+  <header class="topbar">
+    <a class="brand" href="#inicio" aria-label="História em Jogo — início">
+      <span class="brand-seal" aria-hidden="true">HJ</span>
+      <span><strong>História em Jogo</strong><small>Aprenda vivendo a história</small></span>
+    </a>
+    <nav aria-label="Navegação principal">
+      <a class="active" href="#historias">Histórias</a>
+      <a href="#experiencia">Experiência</a>
+      <button class="icon-button" id="aboutButton" type="button" aria-label="Sobre o projeto">?</button>
+    </nav>
+  </header>
+
+  <main id="conteudo">
+    <section class="hero" id="inicio" aria-labelledby="hero-title">
+      <div class="hero-noise" aria-hidden="true"></div>
+      <div class="hero-copy">
+        <span class="eyebrow">ACERVO INTERATIVO • PRIMEIRA COLEÇÃO</span>
+        <h1 id="hero-title">A história sai do livro<br><em>e ganha movimento.</em></h1>
+        <p>Explore acontecimentos históricos em cenas ilustradas, tome decisões e aprenda por meio de minigames criados pelos alunos.</p>
+        <div class="hero-actions">
+          <a class="button primary" href="#brasil">Explorar História do Brasil <span aria-hidden="true">→</span></a>
+          <a class="button ghost" href="#experiencia">Conhecer a experiência</a>
+        </div>
+        <dl class="hero-stats" aria-label="Resumo do acervo">
+          <div><dt>01</dt><dd>história disponível</dd></div>
+          <div><dt>HQ + JOGO</dt><dd>aprendizado interativo</dd></div>
+          <div><dt>16:9</dt><dd>feito para qualquer tela</dd></div>
+        </dl>
+      </div>
+      <div class="hero-art" aria-label="Representação de uma caravela atravessando o Atlântico">
+        <div class="sun"></div>
+        <div class="map-label africa">ÁFRICA</div>
+        <div class="map-label brasil">BRASIL</div>
+        <div class="route-dots" aria-hidden="true"></div>
+        <img src="conteudos/historia-do-brasil/travessia-atlantico/assets/caravela.svg" alt="Caravela portuguesa" width="230" height="230">
+        <div class="caption-card"><small>PRÓXIMO DESTINO</small><strong>Uma costa fora dos mapas</strong></div>
+      </div>
+    </section>
+
+    <section class="learning-path cinematic" id="experiencia" aria-labelledby="path-title">
+      <div class="parallax-mark mark-compass" data-parallax="0.14" aria-hidden="true">✦</div>
+      <div class="parallax-mark mark-year" data-parallax="-0.08" aria-hidden="true">1500</div>
+      <div class="path-intro">
+        <span class="eyebrow dark">NÃO É SÓ JOGAR</span>
+        <h2 id="path-title">Você entra<br>dentro da história.</h2>
+        <p>Primeiro, descubra o acontecimento. Depois, viva o desafio. O resultado muda a forma como você entende o que aconteceu.</p>
+      </div>
+      <ol class="path-flow">
+        <li><span class="path-number">01</span><div><small>DESCUBRA</small><strong>A cena</strong><p>Conheça o momento histórico e seus personagens.</p></div></li>
+        <li class="highlight"><span class="path-number">02</span><div><small>PARTICIPE</small><strong>O desafio</strong><p>Transforme o conteúdo em decisões e movimento.</p></div></li>
+        <li><span class="path-number">03</span><div><small>COMPREENDA</small><strong>As consequências</strong><p>Continue a narrativa e reflita sobre o resultado.</p></div></li>
+      </ol>
+    </section>
+
+    <section class="stories section" id="historias" aria-labelledby="stories-title">
+      <div class="section-heading">
+        <div><span class="eyebrow dark">ESCOLHA UMA JORNADA</span><h2 id="stories-title">Histórias para explorar</h2></div>
+        <p>Novas coleções poderão ser adicionadas conforme os trabalhos da turma forem concluídos.</p>
+      </div>
+
+      <article class="story-feature" id="brasil">
+        <div class="story-number" aria-hidden="true">01</div>
+        <div class="story-content">
+          <span class="status available">Disponível</span>
+          <p class="story-kicker">A PRIMEIRA HISTÓRIA</p>
+          <h3>O Descobrimento do Brasil</h3>
+          <p>Da partida de Lisboa à chegada a uma terra desconhecida: acompanhe a expedição de Pedro Álvares Cabral por capítulos, cenas em quadrinhos e desafios interativos.</p>
+          <ul class="tags" aria-label="Características"><li>Brasil Colônia</li><li>1500</li><li>HQ histórica</li><li>Minigames</li></ul>
+          <div class="journey-preview" aria-label="Percurso disponível">
+            <span><b>01</b> Contexto histórico</span><i aria-hidden="true">→</i>
+            <span><b>02</b> Travessia do Atlântico</span><i aria-hidden="true">→</i>
+            <span><b>03</b> Terra à vista</span>
+          </div>
+          <a class="button primary ink" href="conteudos/historia-do-brasil/travessia-atlantico/index.html">Começar a jornada <span aria-hidden="true">▶</span></a>
+        </div>
+        <div class="story-poster" aria-hidden="true">
+          <span class="poster-top">UMA EXPEDIÇÃO • MUITOS CAMINHOS</span>
+          <span class="poster-year">1500</span>
+          <span class="poster-title">TERRA<br>À VISTA!</span>
+          <div class="poster-wave wave-a"></div><div class="poster-wave wave-b"></div>
+        </div>
+      </article>
+
+      <div class="future-grid" aria-label="Próximas histórias">
+        <article class="future-card"><span class="future-icon">＋</span><div><span>NOVAS HISTÓRIAS</span><h3>Acervo em expansão</h3><p>Outros períodos e lugares poderão receber cenas e minigames.</p></div></article>
+      </div>
+    </section>
+
+  </main>
+
+  <footer><div class="brand compact"><span class="brand-seal">HJ</span><strong>História em Jogo</strong></div><p>Projeto educativo colaborativo • História, cenas e minigames</p><button id="creditsButton" type="button">Créditos do sistema</button></footer>
+
+  <dialog id="aboutDialog" aria-labelledby="dialogTitle">
+    <button class="dialog-close" id="closeDialog" type="button" aria-label="Fechar">×</button>
+    <span class="eyebrow dark">SOBRE O PROJETO</span>
+    <h2 id="dialogTitle">História em Jogo</h2>
+    <p>Um sistema educativo colaborativo que organiza histórias, cenas ilustradas e minigames produzidos pelos alunos.</p>
+    <p>A primeira coleção apresenta capítulos sobre o Descobrimento do Brasil. Novos trabalhos podem ser integrados por links, mantendo cada projeto independente.</p>
+  </dialog>
+  <script src="script.js"></script>
+</body>
+</html>
