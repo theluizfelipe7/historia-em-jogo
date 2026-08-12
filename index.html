@@ -1,114 +1,1282 @@
 <!doctype html>
 <html lang="pt-BR">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#142f3b">
-  <title>História em Jogo — Aprenda vivendo a história</title>
-  <meta name="description" content="Sistema educativo com histórias interativas, cenas ilustradas e minigames.">
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
-  <header class="topbar">
-    <a class="brand" href="#inicio" aria-label="História em Jogo — início">
-      <span class="brand-seal" aria-hidden="true">HJ</span>
-      <span><strong>História em Jogo</strong><small>Aprenda vivendo a história</small></span>
-    </a>
-    <nav aria-label="Navegação principal">
-      <a class="active" href="#historias">Histórias</a>
-      <a href="#experiencia">Experiência</a>
-      <button class="icon-button" id="aboutButton" type="button" aria-label="Sobre o projeto">?</button>
-    </nav>
-  </header>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A História Sai do Livro — plataforma educacional que reúne HQs interativas e minigames sobre História do Brasil."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bangers&family=Caveat:wght@500;700&family=Source+Sans+3:ital,wght@0,300..800;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+    <title>A História Sai do Livro — HQs e minigames de História</title>
+  </head>
 
-  <main id="conteudo">
-    <section class="hero" id="inicio" aria-labelledby="hero-title">
-      <div class="hero-noise" aria-hidden="true"></div>
-      <div class="hero-copy">
-        <span class="eyebrow">ACERVO INTERATIVO • PRIMEIRA COLEÇÃO</span>
-        <h1 id="hero-title">A história sai do livro<br><em>e ganha movimento.</em></h1>
-        <p>Explore acontecimentos históricos em cenas ilustradas, tome decisões e aprenda por meio de minigames criados pelos alunos.</p>
-        <div class="hero-actions">
-          <a class="button primary" href="#brasil">Explorar História do Brasil <span aria-hidden="true">→</span></a>
-          <a class="button ghost" href="#experiencia">Conhecer a experiência</a>
+  <body>
+    <div class="min-h-dvh paper-grain">
+      <!-- =======================================================
+           CABEÇALHO
+           ======================================================= -->
+      <header
+        class="sticky top-0 z-40 border-b-[3px] border-ink bg-paper/95 backdrop-blur"
+      >
+        <div
+          class="mx-auto flex max-w-[1180px] items-center justify-between gap-4 px-5 py-3"
+        >
+          <a
+            href="#inicio"
+            data-route="inicio"
+            class="group flex items-center gap-2 font-hand text-3xl leading-none text-comic"
+          >
+            <svg
+              class="size-6 text-ink transition-transform group-hover:-rotate-6"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M12 7v14" />
+              <path
+                d="M3 18a1 1 0 0 1-1-1V5a2 2 0 0 1 2-2h5a3 3 0 0 1 3 3v15a3 3 0 0 0-3-3Z"
+              />
+              <path
+                d="M21 18a1 1 0 0 0 1-1V5a2 2 0 0 0-2-2h-5a3 3 0 0 0-3 3v15a3 3 0 0 1 3-3Z"
+              />
+            </svg>
+            História em Jogo
+          </a>
+
+          <nav
+            class="flex items-center gap-5 font-display text-lg tracking-wide"
+            aria-label="Principal"
+          >
+            <a href="#inicio" data-route="inicio" class="hover:text-comic"
+              >Histórias</a
+            >
+            <a
+              href="#como-funciona"
+              data-scroll="como-funciona"
+              class="hidden hover:text-comic sm:inline"
+            >
+              Como funciona
+            </a>
+            <a
+              href="#sobre"
+              data-scroll="sobre"
+              class="hidden hover:text-comic sm:inline"
+              >Sobre</a
+            >
+          </nav>
         </div>
-        <dl class="hero-stats" aria-label="Resumo do acervo">
-          <div><dt>01</dt><dd>história disponível</dd></div>
-          <div><dt>HQ + JOGO</dt><dd>aprendizado interativo</dd></div>
-          <div><dt>16:9</dt><dd>feito para qualquer tela</dd></div>
-        </dl>
-      </div>
-      <div class="hero-art" aria-label="Representação de uma caravela atravessando o Atlântico">
-        <div class="sun"></div>
-        <div class="map-label africa">ÁFRICA</div>
-        <div class="map-label brasil">BRASIL</div>
-        <div class="route-dots" aria-hidden="true"></div>
-        <img src="conteudos/historia-do-brasil/travessia-atlantico/assets/caravela.svg" alt="Caravela portuguesa" width="230" height="230">
-        <div class="caption-card"><small>PRÓXIMO DESTINO</small><strong>Uma costa fora dos mapas</strong></div>
-      </div>
-    </section>
+      </header>
 
-    <section class="learning-path cinematic" id="experiencia" aria-labelledby="path-title">
-      <div class="parallax-mark mark-compass" data-parallax="0.14" aria-hidden="true">✦</div>
-      <div class="parallax-mark mark-year" data-parallax="-0.08" aria-hidden="true">1500</div>
-      <div class="path-intro">
-        <span class="eyebrow dark">NÃO É SÓ JOGAR</span>
-        <h2 id="path-title">Você entra<br>dentro da história.</h2>
-        <p>Primeiro, descubra o acontecimento. Depois, viva o desafio. O resultado muda a forma como você entende o que aconteceu.</p>
-      </div>
-      <ol class="path-flow">
-        <li><span class="path-number">01</span><div><small>DESCUBRA</small><strong>A cena</strong><p>Conheça o momento histórico e seus personagens.</p></div></li>
-        <li class="highlight"><span class="path-number">02</span><div><small>PARTICIPE</small><strong>O desafio</strong><p>Transforme o conteúdo em decisões e movimento.</p></div></li>
-        <li><span class="path-number">03</span><div><small>COMPREENDA</small><strong>As consequências</strong><p>Continue a narrativa e reflita sobre o resultado.</p></div></li>
-      </ol>
-    </section>
+      <main>
+        <!-- =====================================================
+             TELA INICIAL
+             Edite aqui os textos e os cards da página principal.
+             ===================================================== -->
+        <div data-view="inicio">
+          <section class="relative border-b-[3px] border-ink bg-navy">
+            <img
+              src="images/hero-banner.jpg"
+              alt="Esquadra portuguesa partindo de Lisboa em 1500, em arte de quadrinhos"
+              class="absolute inset-0 size-full object-cover opacity-70"
+            />
+            <div
+              class="absolute inset-0 bg-gradient-to-r from-navy via-navy/85 to-navy/25"
+              aria-hidden="true"
+            ></div>
+            <div
+              class="pointer-events-none absolute inset-0 halftone-light"
+              aria-hidden="true"
+            ></div>
 
-    <section class="stories section" id="historias" aria-labelledby="stories-title">
-      <div class="section-heading">
-        <div><span class="eyebrow dark">ESCOLHA UMA JORNADA</span><h2 id="stories-title">Histórias para explorar</h2></div>
-        <p>Novas coleções poderão ser adicionadas conforme os trabalhos da turma forem concluídos.</p>
-      </div>
+            <div class="relative mx-auto max-w-[1180px] px-5 py-20 sm:py-28">
+              <div class="panel-in max-w-2xl">
+                <span
+                  class="inline-block rotate-[-2deg] border-2 border-ink bg-comic px-2 py-[2px] font-display text-sm leading-none tracking-wider text-paper-2 uppercase shadow-[2px_2px_0_rgba(18,20,26,.8)]"
+                >
+                  HQs interativas + minigames
+                </span>
+                <h1
+                  class="mt-5 font-display text-5xl leading-[0.92] text-paper-2 sm:text-7xl"
+                >
+                  A História<br />
+                  <span class="text-gold">Sai do Livro</span>
+                </h1>
+                <p class="mt-5 max-w-xl text-lg text-paper/90">
+                  Uma pequena plataforma educacional que reúne histórias em
+                  quadrinhos e minigames para estudar História do Brasil. Leia o
+                  capítulo, jogue a cena e desbloqueie o próximo episódio.
+                </p>
 
-      <article class="story-feature" id="brasil">
-        <div class="story-number" aria-hidden="true">01</div>
-        <div class="story-content">
-          <span class="status available">Disponível</span>
-          <p class="story-kicker">A PRIMEIRA HISTÓRIA</p>
-          <h3>O Descobrimento do Brasil</h3>
-          <p>Da partida de Lisboa à chegada a uma terra desconhecida: acompanhe a expedição de Pedro Álvares Cabral por capítulos, cenas em quadrinhos e desafios interativos.</p>
-          <ul class="tags" aria-label="Características"><li>Brasil Colônia</li><li>1500</li><li>HQ histórica</li><li>Minigames</li></ul>
-          <div class="journey-preview" aria-label="Percurso disponível">
-            <span><b>01</b> Contexto histórico</span><i aria-hidden="true">→</i>
-            <span><b>02</b> Travessia do Atlântico</span><i aria-hidden="true">→</i>
-            <span><b>03</b> Terra à vista</span>
+                <div class="mt-8 flex flex-wrap items-center gap-4">
+                  <a
+                    href="#historias"
+                    data-scroll="historias"
+                    class="inline-flex items-center gap-2 border-[3px] border-ink bg-comic px-6 py-3 font-display text-2xl tracking-wide text-paper-2 shadow-[6px_6px_0_rgba(18,20,26,.85)] transition-transform hover:-translate-y-[3px]"
+                  >
+                    Explorar capítulos
+                  </a>
+                  <a
+                    href="#como-funciona"
+                    data-scroll="como-funciona"
+                    class="inline-flex items-center gap-2 border-[3px] border-paper-2 px-6 py-3 font-display text-2xl tracking-wide text-paper-2 transition-colors hover:bg-paper-2 hover:text-ink"
+                  >
+                    Como funciona
+                  </a>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- COMO FUNCIONA -->
+          <section id="como-funciona" class="mx-auto max-w-[1180px] px-5 py-16">
+            <div class="mb-8">
+              <p class="font-hand text-2xl text-comic">do livro para a tela</p>
+              <h2
+                class="font-display text-4xl leading-none text-ink sm:text-5xl"
+              >
+                Como funciona
+              </h2>
+              <span class="mt-3 block h-[3px] w-24 bg-ink"></span>
+            </div>
+
+            <div class="grid gap-6 md:grid-cols-3">
+              <article
+                class="panel-in relative overflow-hidden ink-panel rounded-[3px] bg-paper-2 p-6 text-ink"
+              >
+                <div
+                  class="pointer-events-none absolute inset-0 halftone"
+                  aria-hidden="true"
+                ></div>
+                <div class="relative">
+                  <svg
+                    class="size-8 text-comic"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M12 7v14" />
+                    <path
+                      d="M3 18a1 1 0 0 1-1-1V5a2 2 0 0 1 2-2h5a3 3 0 0 1 3 3v15a3 3 0 0 0-3-3Z"
+                    />
+                    <path
+                      d="M21 18a1 1 0 0 0 1-1V5a2 2 0 0 0-2-2h-5a3 3 0 0 0-3 3v15a3 3 0 0 1 3-3Z"
+                    />
+                  </svg>
+                  <h3 class="mt-3 font-display text-2xl leading-none text-ink">
+                    1. Leia a HQ
+                  </h3>
+                  <p class="mt-2 text-ink/85">
+                    Cada capítulo abre com o contexto histórico em painéis de
+                    quadrinho — datas, personagens e motivações.
+                  </p>
+                </div>
+              </article>
+
+              <article
+                class="panel-in relative overflow-hidden ink-panel rounded-[3px] bg-paper-2 p-6 text-ink"
+                style="animation-delay: 90ms"
+              >
+                <div
+                  class="pointer-events-none absolute inset-0 halftone"
+                  aria-hidden="true"
+                ></div>
+                <div class="relative">
+                  <svg
+                    class="size-8 text-comic"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <line x1="6" x2="10" y1="11" y2="11" />
+                    <line x1="8" x2="8" y1="9" y2="13" />
+                    <line x1="15" x2="15.01" y1="12" y2="12" />
+                    <line x1="18" x2="18.01" y1="10" y2="10" />
+                    <path
+                      d="M17.32 5H6.68a4 4 0 0 0-3.79 2.7L.73 14a3 3 0 0 0 4.61 3.36L8 15h8l2.66 2.36A3 3 0 0 0 23.27 14l-2.16-6.3A4 4 0 0 0 17.32 5Z"
+                    />
+                  </svg>
+                  <h3 class="mt-3 font-display text-2xl leading-none text-ink">
+                    2. Jogue o minigame
+                  </h3>
+                  <p class="mt-2 text-ink/85">
+                    Depois da leitura, o conteúdo vira jogo: decisões,
+                    obstáculos e a mesma rota que a esquadra enfrentou.
+                  </p>
+                </div>
+              </article>
+
+              <article
+                class="panel-in relative overflow-hidden ink-panel rounded-[3px] bg-paper-2 p-6 text-ink"
+                style="animation-delay: 180ms"
+              >
+                <div
+                  class="pointer-events-none absolute inset-0 halftone"
+                  aria-hidden="true"
+                ></div>
+                <div class="relative">
+                  <svg
+                    class="size-8 text-comic"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M10 14.66v1.626a2 2 0 0 1-.976 1.696A5 5 0 0 0 7 21.978"
+                    />
+                    <path
+                      d="M14 14.66v1.626a2 2 0 0 0 .976 1.696A5 5 0 0 1 17 21.978"
+                    />
+                    <path d="M18 9h1.5a1 1 0 0 0 0-5H18" />
+                    <path d="M4 22h16" />
+                    <path
+                      d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1Z"
+                    />
+                    <path d="M6 9H4.5a1 1 0 0 1 0-5H6" />
+                  </svg>
+                  <h3 class="mt-3 font-display text-2xl leading-none text-ink">
+                    3. Desbloqueie o próximo
+                  </h3>
+                  <p class="mt-2 text-ink/85">
+                    Concluir a HQ ou o minigame libera o capítulo seguinte. Seu
+                    progresso fica salvo no navegador.
+                  </p>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <!-- HISTÓRIAS -->
+          <section id="historias" class="mx-auto max-w-[1180px] px-5 pb-8">
+            <div class="flex flex-wrap items-end justify-between gap-4">
+              <div class="mb-4">
+                <p class="font-hand text-2xl text-comic">escolha uma trilha</p>
+                <h2
+                  class="font-display text-4xl leading-none text-ink sm:text-5xl"
+                >
+                  Histórias
+                </h2>
+                <span class="mt-3 block h-[3px] w-24 bg-ink"></span>
+              </div>
+              <p class="mb-6 max-w-md font-hand text-2xl text-ink/70">
+                Clique em uma história para ver os capítulos.
+              </p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-6 sm:gap-8 lg:grid-cols-4">
+              <!-- Card: História do Brasil -->
+              <div class="panel-in">
+                <a
+                  href="#historia-do-brasil"
+                  data-route="historia"
+                  class="block"
+                >
+                  <div
+                    class="group relative block transition-transform duration-200 hover:-translate-y-2 hover:rotate-0"
+                    style="transform: rotate(-2deg)"
+                  >
+                    <div
+                      class="relative overflow-hidden border-[3px] border-ink bg-navy shadow-[6px_6px_0_rgba(18,20,26,.85)]"
+                    >
+                      <img
+                        src="images/capa-historia-do-brasil.jpg"
+                        alt="Capa da história História do Brasil"
+                        class="aspect-[2/3] w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                      />
+                      <div
+                        class="pointer-events-none absolute inset-0 halftone"
+                        aria-hidden="true"
+                      ></div>
+                      <div
+                        class="absolute inset-x-0 top-0 border-b-[3px] border-ink bg-comic px-3 py-1"
+                      >
+                        <p
+                          class="font-display text-xl leading-tight tracking-wide text-paper-2"
+                        >
+                          História do Brasil
+                        </p>
+                      </div>
+                      <div
+                        class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink via-ink/85 to-transparent px-3 pt-10 pb-3"
+                      >
+                        <p
+                          class="font-hand text-xl leading-tight text-gold-soft"
+                        >
+                          Das navegações à formação do país
+                        </p>
+                        <p class="mt-1 text-sm leading-snug text-paper/85">
+                          A esquadra de Cabral, o encontro com os povos
+                          originários e tudo o que veio depois — contado em HQ e
+                          jogado em minigames.
+                        </p>
+                      </div>
+                      <div class="absolute top-12 right-2 rotate-[8deg]">
+                        <span
+                          class="inline-block border-2 border-ink bg-gold px-2 py-[2px] font-display text-sm leading-none tracking-wider text-ink uppercase shadow-[2px_2px_0_rgba(18,20,26,.8)]"
+                          >Disponível</span
+                        >
+                      </div>
+                    </div>
+                    <p
+                      class="mt-3 text-center font-display text-lg tracking-wide text-ink/70"
+                    >
+                      3 capítulos ·
+                      <span class="text-comic"
+                        ><span data-home-completed>0</span> concluídos</span
+                      >
+                    </p>
+                  </div>
+                </a>
+              </div>
+
+              <!-- Card bloqueado: História Geral -->
+              <div class="panel-in" style="animation-delay: 80ms">
+                <div aria-disabled="true" class="cursor-not-allowed">
+                  <div
+                    class="group relative block transition-transform duration-200"
+                    style="transform: rotate(1.5deg)"
+                  >
+                    <div
+                      class="relative overflow-hidden border-[3px] border-ink bg-navy shadow-[6px_6px_0_rgba(18,20,26,.85)]"
+                    >
+                      <img
+                        src="images/capa-historia-geral.jpg"
+                        alt="Capa da história História Geral"
+                        class="aspect-[2/3] w-full object-cover opacity-55 grayscale-[70%] transition-transform duration-500"
+                      />
+                      <div
+                        class="pointer-events-none absolute inset-0 halftone"
+                        aria-hidden="true"
+                      ></div>
+                      <div
+                        class="absolute inset-x-0 top-0 border-b-[3px] border-ink bg-comic px-3 py-1"
+                      >
+                        <p
+                          class="font-display text-xl leading-tight tracking-wide text-paper-2"
+                        >
+                          História Geral
+                        </p>
+                      </div>
+                      <div
+                        class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink via-ink/85 to-transparent px-3 pt-10 pb-3"
+                      >
+                        <p
+                          class="font-hand text-xl leading-tight text-gold-soft"
+                        >
+                          Antiguidade, Idade Média e Moderna
+                        </p>
+                        <p class="mt-1 text-sm leading-snug text-paper/85">
+                          Roma, feudalismo, Renascimento e as revoluções que
+                          reorganizaram o mundo.
+                        </p>
+                      </div>
+                      <div class="absolute top-12 right-2 rotate-[8deg]">
+                        <span
+                          class="inline-block border-2 border-ink bg-lock/80 px-2 py-[2px] font-display text-sm leading-none tracking-wider text-paper-2 uppercase shadow-[2px_2px_0_rgba(18,20,26,.8)]"
+                          >Em breve</span
+                        >
+                      </div>
+                      <div class="absolute inset-0 grid place-items-center">
+                        <span
+                          class="grid size-14 place-items-center rounded-full border-[3px] border-ink bg-paper-2/90"
+                        >
+                          <span class="lock-icon" aria-hidden="true"></span>
+                        </span>
+                      </div>
+                    </div>
+                    <p
+                      class="mt-3 text-center font-display text-lg tracking-wide text-lock"
+                    >
+                      Em produção
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card bloqueado: História da América -->
+              <div class="panel-in" style="animation-delay: 160ms">
+                <div aria-disabled="true" class="cursor-not-allowed">
+                  <div
+                    class="group relative block transition-transform duration-200"
+                    style="transform: rotate(-1deg)"
+                  >
+                    <div
+                      class="relative overflow-hidden border-[3px] border-ink bg-navy shadow-[6px_6px_0_rgba(18,20,26,.85)]"
+                    >
+                      <img
+                        src="images/capa-historia-america.jpg"
+                        alt="Capa da história História da América"
+                        class="aspect-[2/3] w-full object-cover opacity-55 grayscale-[70%] transition-transform duration-500"
+                      />
+                      <div
+                        class="pointer-events-none absolute inset-0 halftone"
+                        aria-hidden="true"
+                      ></div>
+                      <div
+                        class="absolute inset-x-0 top-0 border-b-[3px] border-ink bg-comic px-3 py-1"
+                      >
+                        <p
+                          class="font-display text-xl leading-tight tracking-wide text-paper-2"
+                        >
+                          História da América
+                        </p>
+                      </div>
+                      <div
+                        class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink via-ink/85 to-transparent px-3 pt-10 pb-3"
+                      >
+                        <p
+                          class="font-hand text-xl leading-tight text-gold-soft"
+                        >
+                          Povos originários e colonização
+                        </p>
+                        <p class="mt-1 text-sm leading-snug text-paper/85">
+                          Astecas, incas, maias e o choque entre mundos no
+                          continente americano.
+                        </p>
+                      </div>
+                      <div class="absolute top-12 right-2 rotate-[8deg]">
+                        <span
+                          class="inline-block border-2 border-ink bg-lock/80 px-2 py-[2px] font-display text-sm leading-none tracking-wider text-paper-2 uppercase shadow-[2px_2px_0_rgba(18,20,26,.8)]"
+                          >Em breve</span
+                        >
+                      </div>
+                      <div class="absolute inset-0 grid place-items-center">
+                        <span
+                          class="grid size-14 place-items-center rounded-full border-[3px] border-ink bg-paper-2/90"
+                        >
+                          <span class="lock-icon" aria-hidden="true"></span>
+                        </span>
+                      </div>
+                    </div>
+                    <p
+                      class="mt-3 text-center font-display text-lg tracking-wide text-lock"
+                    >
+                      Em produção
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card bloqueado: História Antiga -->
+              <div class="panel-in" style="animation-delay: 240ms">
+                <div aria-disabled="true" class="cursor-not-allowed">
+                  <div
+                    class="group relative block transition-transform duration-200"
+                    style="transform: rotate(2deg)"
+                  >
+                    <div
+                      class="relative overflow-hidden border-[3px] border-ink bg-navy shadow-[6px_6px_0_rgba(18,20,26,.85)]"
+                    >
+                      <img
+                        src="images/capa-historia-antiga.jpg"
+                        alt="Capa da história História Antiga"
+                        class="aspect-[2/3] w-full object-cover opacity-55 grayscale-[70%] transition-transform duration-500"
+                      />
+                      <div
+                        class="pointer-events-none absolute inset-0 halftone"
+                        aria-hidden="true"
+                      ></div>
+                      <div
+                        class="absolute inset-x-0 top-0 border-b-[3px] border-ink bg-comic px-3 py-1"
+                      >
+                        <p
+                          class="font-display text-xl leading-tight tracking-wide text-paper-2"
+                        >
+                          História Antiga
+                        </p>
+                      </div>
+                      <div
+                        class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink via-ink/85 to-transparent px-3 pt-10 pb-3"
+                      >
+                        <p
+                          class="font-hand text-xl leading-tight text-gold-soft"
+                        >
+                          Egito, Mesopotâmia e Grécia
+                        </p>
+                        <p class="mt-1 text-sm leading-snug text-paper/85">
+                          As primeiras cidades, a escrita e os impérios que
+                          inventaram a política.
+                        </p>
+                      </div>
+                      <div class="absolute top-12 right-2 rotate-[8deg]">
+                        <span
+                          class="inline-block border-2 border-ink bg-lock/80 px-2 py-[2px] font-display text-sm leading-none tracking-wider text-paper-2 uppercase shadow-[2px_2px_0_rgba(18,20,26,.8)]"
+                          >Em breve</span
+                        >
+                      </div>
+                      <div class="absolute inset-0 grid place-items-center">
+                        <span
+                          class="grid size-14 place-items-center rounded-full border-[3px] border-ink bg-paper-2/90"
+                        >
+                          <span class="lock-icon" aria-hidden="true"></span>
+                        </span>
+                      </div>
+                    </div>
+                    <p
+                      class="mt-3 text-center font-display text-lg tracking-wide text-lock"
+                    >
+                      Em produção
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- NOTA DO PROJETO -->
+          <section class="mx-auto max-w-[1180px] px-5 py-16">
+            <div
+              class="relative overflow-hidden ink-panel rounded-[3px] bg-paper-2 p-8 text-ink sm:p-10"
+            >
+              <div
+                class="pointer-events-none absolute inset-0 halftone"
+                aria-hidden="true"
+              ></div>
+              <div class="relative">
+                <p class="font-hand text-3xl text-comic">nota do projeto</p>
+                <p class="mt-2 max-w-3xl text-lg text-ink/85">
+                  “História em Jogo” é um projeto acadêmico. A tela de histórias
+                  é a entrada da plataforma; cada minigame vive em sua própria
+                  pasta e é aberto a partir do capítulo correspondente, o que
+                  mantém o jogo independente e o projeto fácil de manter e
+                  expandir por outros colegas.
+                </p>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- =====================================================
+             TELA DA HISTÓRIA DO BRASIL
+             ===================================================== -->
+        <div data-view="historia" hidden>
+          <section class="relative border-b-[3px] border-ink bg-navy">
+            <div
+              class="pointer-events-none absolute inset-0 halftone-light"
+              aria-hidden="true"
+            ></div>
+            <div
+              class="relative mx-auto grid max-w-[1180px] gap-8 px-5 py-12 md:grid-cols-[260px_1fr] md:py-16"
+            >
+              <img
+                src="images/capa-historia-do-brasil.jpg"
+                alt="Capa da história História do Brasil"
+                class="w-full max-w-[260px] rotate-[-2deg] border-[3px] border-ink object-cover shadow-[6px_6px_0_rgba(18,20,26,.85)]"
+              />
+              <div class="panel-in">
+                <a
+                  href="#inicio"
+                  data-route="inicio"
+                  class="inline-flex items-center gap-2 font-display text-lg tracking-wide text-gold hover:text-gold-soft"
+                >
+                  <span aria-hidden="true">←</span> Todas as histórias
+                </a>
+                <h1
+                  class="mt-3 font-display text-5xl leading-none text-paper-2 sm:text-6xl"
+                >
+                  História do Brasil
+                </h1>
+                <p class="font-hand text-2xl text-gold-soft">
+                  Das navegações à formação do país
+                </p>
+                <p class="mt-3 max-w-2xl text-paper/85">
+                  A esquadra de Cabral, o encontro com os povos originários e
+                  tudo o que veio depois — contado em HQ e jogado em minigames.
+                </p>
+
+                <div class="mt-6 max-w-md">
+                  <div
+                    class="flex items-center justify-between font-display text-lg tracking-wide text-paper-2"
+                  >
+                    <span>Progresso da trilha</span>
+                    <span
+                      ><span data-history-completed>0</span>/3 capítulos</span
+                    >
+                  </div>
+                  <div class="mt-2 flex items-center gap-3">
+                    <div
+                      class="relative h-4 flex-1 border-[3px] border-ink bg-paper"
+                    >
+                      <div
+                        data-progress-bar
+                        class="h-full bg-comic transition-[width] duration-500"
+                        style="width: 0%"
+                      ></div>
+                      <div
+                        class="pointer-events-none absolute inset-0 halftone"
+                        aria-hidden="true"
+                      ></div>
+                    </div>
+                    <span
+                      data-progress-percent
+                      class="font-display text-lg text-ink"
+                      >0%</span
+                    >
+                  </div>
+                </div>
+
+                <p
+                  class="mt-4 font-hand text-2xl text-paper/80"
+                  data-next-chapter
+                >
+                  próximo:
+                  <span class="text-gold-soft"
+                    >Capítulo 1 — A Partida de Portugal</span
+                  >
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <section class="mx-auto max-w-[1180px] px-5 py-14">
+            <div class="mb-8">
+              <p class="font-hand text-2xl text-comic">trilha de capítulos</p>
+              <h2
+                class="font-display text-4xl leading-none text-ink sm:text-5xl"
+              >
+                Capítulos
+              </h2>
+              <span class="mt-3 block h-[3px] w-24 bg-ink"></span>
+            </div>
+
+            <div class="grid gap-7">
+              <!-- Capítulo 1 -->
+              <article
+                class="panel-in relative overflow-hidden ink-panel rounded-[3px] bg-paper-2 text-ink"
+              >
+                <div
+                  class="pointer-events-none absolute inset-0 halftone"
+                  aria-hidden="true"
+                ></div>
+                <div class="relative">
+                  <div class="grid gap-0 md:grid-cols-[220px_1fr]">
+                    <div
+                      class="relative border-b-[3px] border-ink bg-navy md:border-r-[3px] md:border-b-0"
+                    >
+                      <img
+                        src="images/cap-1-partida.jpg"
+                        alt="Ilustração do capítulo 1"
+                        class="h-44 w-full object-cover md:h-full"
+                      />
+                      <div
+                        class="pointer-events-none absolute inset-0 halftone"
+                        aria-hidden="true"
+                      ></div>
+                      <span
+                        class="absolute top-2 left-2 border-[3px] border-ink bg-gold px-2 font-display text-2xl leading-tight text-ink"
+                        >01</span
+                      >
+                    </div>
+                    <div class="p-5 sm:p-6">
+                      <div class="flex flex-wrap items-center gap-2">
+                        <span
+                          class="inline-flex items-center gap-1 border-2 border-ink bg-paper px-2 py-[1px] font-display text-[13px] tracking-wide text-ink"
+                          >HQ</span
+                        >
+                        <span
+                          data-completed-stamp="partida-de-portugal"
+                          class="inline-block border-2 border-ink bg-comic px-2 py-[2px] font-display text-sm leading-none tracking-wider text-paper-2 uppercase shadow-[2px_2px_0_rgba(18,20,26,.8)]"
+                          hidden
+                          >✓ concluído</span
+                        >
+                      </div>
+                      <h3
+                        class="mt-3 font-display text-3xl leading-none text-ink"
+                      >
+                        Capítulo 1 — A Partida de Portugal
+                      </h3>
+                      <p class="font-hand text-xl text-comic">
+                        9 de março de 1500
+                      </p>
+                      <p class="mt-2 max-w-2xl text-ink/85">
+                        Lisboa reúne a maior esquadra já vista para dominar a
+                        rota das especiarias. Dom Manuel I entrega o comando a
+                        Pedro Álvares Cabral.
+                      </p>
+                      <div class="mt-5 flex flex-wrap items-center gap-3">
+                        <a
+                          href="#capitulo-partida-de-portugal"
+                          data-route="capitulo-partida-de-portugal"
+                          class="inline-flex items-center gap-2 border-[3px] border-ink bg-comic px-4 py-2 font-display text-lg tracking-wide text-paper-2 shadow-[4px_4px_0_rgba(18,20,26,.85)] transition-transform hover:-translate-y-[2px]"
+                          >▤ Ler a HQ</a
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </article>
+
+              <!-- Capítulo 2: o JavaScript controla o bloqueio -->
+              <article
+                data-chapter-two-card
+                class="panel-in relative overflow-hidden ink-panel rounded-[3px] bg-paper-2 text-ink opacity-80 saturate-[.55]"
+                style="animation-delay: 70ms"
+              >
+                <div
+                  class="pointer-events-none absolute inset-0 halftone"
+                  aria-hidden="true"
+                ></div>
+                <div class="relative">
+                  <div class="grid gap-0 md:grid-cols-[220px_1fr]">
+                    <div
+                      class="relative border-b-[3px] border-ink bg-navy md:border-r-[3px] md:border-b-0"
+                    >
+                      <img
+                        data-chapter-two-image
+                        src="images/cap-2-travessia.jpg"
+                        alt="Ilustração do capítulo 2"
+                        class="h-44 w-full object-cover opacity-60 grayscale-[65%] md:h-full"
+                      />
+                      <div
+                        class="pointer-events-none absolute inset-0 halftone"
+                        aria-hidden="true"
+                      ></div>
+                      <span
+                        class="absolute top-2 left-2 border-[3px] border-ink bg-gold px-2 font-display text-2xl leading-tight text-ink"
+                        >02</span
+                      >
+                      <span
+                        data-chapter-two-lock
+                        class="absolute right-2 bottom-2 grid size-10 place-items-center rounded-full border-[3px] border-ink bg-paper-2"
+                        aria-label="Bloqueado"
+                        ><span
+                          class="lock-icon lock-icon--small"
+                          aria-hidden="true"
+                        ></span
+                      ></span>
+                    </div>
+                    <div class="p-5 sm:p-6">
+                      <div class="flex flex-wrap items-center gap-2">
+                        <span
+                          class="inline-flex items-center gap-1 border-2 border-ink bg-paper px-2 py-[1px] font-display text-[13px] tracking-wide text-ink"
+                          >MINIGAME</span
+                        >
+                        <span
+                          data-completed-stamp="travessia-atlantico"
+                          class="inline-block border-2 border-ink bg-comic px-2 py-[2px] font-display text-sm leading-none tracking-wider text-paper-2 uppercase shadow-[2px_2px_0_rgba(18,20,26,.8)]"
+                          hidden
+                          >✓ concluído</span
+                        >
+                      </div>
+                      <h3
+                        class="mt-3 font-display text-3xl leading-none text-ink"
+                      >
+                        Capítulo 2 — A Travessia do Atlântico e o Desvio
+                      </h3>
+                      <p class="font-hand text-xl text-comic">
+                        Março e abril de 1500
+                      </p>
+                      <p class="mt-2 max-w-2xl text-ink/85">
+                        Depois de Cabo Verde, a esquadra faz a “volta do mar”:
+                        desvia para oeste para fugir das calmarias e aproveitar
+                        ventos e correntes. O rumo aponta para um território
+                        fora dos mapas europeus.
+                      </p>
+                      <div class="mt-5 flex flex-wrap items-center gap-3">
+                        <p
+                          data-chapter-two-locked
+                          class="flex items-center gap-2 border-2 border-dashed border-lock bg-paper px-3 py-2 font-display text-base tracking-wide text-lock"
+                        >
+                          <span
+                            class="lock-icon lock-icon--small"
+                            aria-hidden="true"
+                          ></span>
+                          Conclua o Capítulo 1 para liberar
+                        </p>
+                        <div
+                          data-chapter-two-actions
+                          class="flex flex-wrap items-center gap-3"
+                          hidden
+                        >
+                          <a
+                            href="#capitulo-travessia-atlantico"
+                            data-route="capitulo-travessia-atlantico"
+                            class="inline-flex items-center gap-2 border-[3px] border-ink bg-comic px-4 py-2 font-display text-lg tracking-wide text-paper-2 shadow-[4px_4px_0_rgba(18,20,26,.85)] transition-transform hover:-translate-y-[2px]"
+                            >▤ Ler contexto</a
+                          >
+                          <a
+                            href="travessia-atlantico/index.html"
+                            class="inline-flex items-center gap-2 border-[3px] border-ink bg-gold px-4 py-2 font-display text-lg tracking-wide text-ink shadow-[4px_4px_0_rgba(18,20,26,.85)] transition-transform hover:-translate-y-[2px]"
+                            >⚓ Jogar minigame</a
+                          >
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </article>
+
+              <!-- Capítulo 3 -->
+              <article
+                class="panel-in relative overflow-hidden ink-panel rounded-[3px] bg-paper-2 text-ink opacity-80 saturate-[.55]"
+                style="animation-delay: 140ms"
+              >
+                <div
+                  class="pointer-events-none absolute inset-0 halftone"
+                  aria-hidden="true"
+                ></div>
+                <div class="relative">
+                  <div class="grid gap-0 md:grid-cols-[220px_1fr]">
+                    <div
+                      class="relative border-b-[3px] border-ink bg-navy md:border-r-[3px] md:border-b-0"
+                    >
+                      <div
+                        class="grid h-44 w-full place-items-center bg-petrol md:h-full"
+                      >
+                        <span class="font-hand text-2xl text-gold-soft"
+                          >em produção</span
+                        >
+                      </div>
+                      <div
+                        class="pointer-events-none absolute inset-0 halftone"
+                        aria-hidden="true"
+                      ></div>
+                      <span
+                        class="absolute top-2 left-2 border-[3px] border-ink bg-gold px-2 font-display text-2xl leading-tight text-ink"
+                        >03</span
+                      >
+                      <span
+                        class="absolute right-2 bottom-2 grid size-10 place-items-center rounded-full border-[3px] border-ink bg-paper-2"
+                        ><span
+                          class="lock-icon lock-icon--small"
+                          aria-hidden="true"
+                        ></span
+                      ></span>
+                    </div>
+                    <div class="p-5 sm:p-6">
+                      <div class="flex flex-wrap items-center gap-2">
+                        <span
+                          class="inline-flex items-center gap-1 border-2 border-ink bg-paper px-2 py-[1px] font-display text-[13px] tracking-wide text-ink"
+                          >HQ + MINIGAME</span
+                        >
+                        <span
+                          class="inline-block border-2 border-ink bg-lock/80 px-2 py-[2px] font-display text-sm leading-none tracking-wider text-paper-2 uppercase shadow-[2px_2px_0_rgba(18,20,26,.8)]"
+                          >Em breve</span
+                        >
+                      </div>
+                      <h3
+                        class="mt-3 font-display text-3xl leading-none text-ink"
+                      >
+                        Capítulo 3 — A Chegada à Terra Nova
+                      </h3>
+                      <p class="font-hand text-xl text-comic">
+                        22 de abril de 1500
+                      </p>
+                      <p class="mt-2 max-w-2xl text-ink/85">
+                        O Monte Pascoal no horizonte, o primeiro contato com os
+                        povos originários e a carta de Pero Vaz de Caminha.
+                      </p>
+                      <div class="mt-5 flex flex-wrap items-center gap-3">
+                        <p
+                          class="flex items-center gap-2 border-2 border-dashed border-lock bg-paper px-3 py-2 font-display text-base tracking-wide text-lock"
+                        >
+                          <span
+                            class="lock-icon lock-icon--small"
+                            aria-hidden="true"
+                          ></span>
+                          Capítulo em produção
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </div>
+
+            <button
+              type="button"
+              data-reset-progress
+              class="mt-10 inline-flex items-center gap-2 border-2 border-dashed border-ink/40 px-3 py-2 font-display text-base tracking-wide text-ink/60 transition-colors hover:border-comic hover:text-comic"
+            >
+              ↻ Reiniciar progresso desta história
+            </button>
+          </section>
+        </div>
+
+        <!-- =====================================================
+             CAPÍTULO 1 — HQ
+             ===================================================== -->
+        <div data-view="capitulo-partida-de-portugal" hidden>
+          <section class="relative border-b-[3px] border-ink bg-navy">
+            <img
+              src="images/cap-1-partida.jpg"
+              alt="Ilustração do capítulo 1"
+              class="absolute inset-0 size-full object-cover opacity-55"
+            />
+            <div
+              class="absolute inset-0 bg-gradient-to-r from-navy via-navy/90 to-navy/40"
+              aria-hidden="true"
+            ></div>
+            <div
+              class="pointer-events-none absolute inset-0 halftone-light"
+              aria-hidden="true"
+            ></div>
+            <div class="relative mx-auto max-w-[1180px] px-5 py-14">
+              <a
+                href="#historia-do-brasil"
+                data-route="historia"
+                class="inline-flex items-center gap-2 font-display text-lg tracking-wide text-gold hover:text-gold-soft"
+                >← História do Brasil</a
+              >
+              <div class="mt-4 flex flex-wrap items-center gap-2">
+                <span
+                  class="inline-flex items-center gap-1 border-2 border-ink bg-paper px-2 py-[1px] font-display text-[13px] tracking-wide text-ink"
+                  >HQ</span
+                >
+                <span
+                  data-completed-stamp="partida-de-portugal"
+                  class="inline-block border-2 border-ink bg-comic px-2 py-[2px] font-display text-sm leading-none tracking-wider text-paper-2 uppercase shadow-[2px_2px_0_rgba(18,20,26,.8)]"
+                  hidden
+                  >Concluído</span
+                >
+              </div>
+              <h1
+                class="panel-in mt-3 max-w-3xl font-display text-5xl leading-[0.95] text-paper-2 sm:text-6xl"
+              >
+                Capítulo 1 — A Partida de Portugal
+              </h1>
+              <p class="font-hand text-2xl text-gold-soft">
+                9 de março de 1500
+              </p>
+            </div>
+          </section>
+
+          <section class="mx-auto max-w-[900px] px-5 py-14">
+            <div class="mb-8">
+              <p class="font-hand text-2xl text-comic">leitura do capítulo</p>
+              <h2
+                class="font-display text-4xl leading-none text-ink sm:text-5xl"
+              >
+                Cenas
+              </h2>
+              <span class="mt-3 block h-[3px] w-24 bg-ink"></span>
+            </div>
+            <div class="grid gap-7">
+              <article
+                class="panel-in relative overflow-hidden ink-panel rounded-[3px] bg-paper-2 p-6 text-ink sm:p-8"
+              >
+                <div
+                  class="pointer-events-none absolute inset-0 halftone"
+                  aria-hidden="true"
+                ></div>
+                <div class="relative">
+                  <p
+                    class="inline-block border-2 border-ink bg-gold-soft px-3 py-1 font-display text-lg leading-none tracking-wide text-ink"
+                  >
+                    Cena 1 — O ouro que vinha do Oriente
+                  </p>
+                  <p class="mt-4 text-lg leading-relaxed text-ink/90">
+                    No ano de 1500, o comércio de especiarias (cravo, canela,
+                    pimenta) vindas do Oriente movia a economia europeia. Quem
+                    controlasse as rotas marítimas controlaria uma fortuna.
+                  </p>
+                </div>
+              </article>
+              <article
+                class="panel-in relative overflow-hidden ink-panel rounded-[3px] bg-paper-2 p-6 text-ink sm:p-8"
+                style="animation-delay: 80ms"
+              >
+                <div
+                  class="pointer-events-none absolute inset-0 halftone"
+                  aria-hidden="true"
+                ></div>
+                <div class="relative">
+                  <p
+                    class="inline-block border-2 border-ink bg-gold-soft px-3 py-1 font-display text-lg leading-none tracking-wide text-ink"
+                  >
+                    Cena 2 — A maior esquadra já vista
+                  </p>
+                  <p class="mt-4 text-lg leading-relaxed text-ink/90">
+                    Em Lisboa, o Rei Dom Manuel I ordena a montagem da maior
+                    esquadra já vista — 13 navios e cerca de 1.500 homens — para
+                    consolidar o comércio com as Índias.
+                  </p>
+                </div>
+              </article>
+              <article
+                class="panel-in relative overflow-hidden ink-panel rounded-[3px] bg-paper-2 p-6 text-ink sm:p-8"
+                style="animation-delay: 160ms"
+              >
+                <div
+                  class="pointer-events-none absolute inset-0 halftone"
+                  aria-hidden="true"
+                ></div>
+                <div class="relative">
+                  <p
+                    class="inline-block border-2 border-ink bg-gold-soft px-3 py-1 font-display text-lg leading-none tracking-wide text-ink"
+                  >
+                    Cena 3 — O homem de confiança do Rei
+                  </p>
+                  <p class="mt-4 text-lg leading-relaxed text-ink/90">
+                    O comando da frota é entregue a Pedro Álvares Cabral, um
+                    nobre militar que tinha a total confiança do Rei. A partida
+                    é um grande evento, marcado por uma missa solene.
+                  </p>
+                </div>
+              </article>
+              <article
+                class="panel-in relative overflow-hidden ink-panel rounded-[3px] bg-paper-2 p-6 text-ink sm:p-8"
+                style="animation-delay: 240ms"
+              >
+                <div
+                  class="pointer-events-none absolute inset-0 halftone"
+                  aria-hidden="true"
+                ></div>
+                <div class="relative">
+                  <p
+                    class="inline-block border-2 border-ink bg-gold-soft px-3 py-1 font-display text-lg leading-none tracking-wide text-ink"
+                  >
+                    Cena 4 — O plano original
+                  </p>
+                  <p class="mt-4 text-lg leading-relaxed text-ink/90">
+                    O plano era contornar o continente africano pelo Oceano
+                    Atlântico, dobrando o Cabo da Boa Esperança, até chegar a
+                    Calicute, na Índia. Só que o Atlântico tinha outros planos.
+                  </p>
+                </div>
+              </article>
+            </div>
+
+            <div
+              class="relative mt-12 overflow-hidden ink-panel rounded-[3px] bg-navy p-7 text-paper sm:p-9"
+            >
+              <div
+                class="pointer-events-none absolute inset-0 halftone"
+                aria-hidden="true"
+              ></div>
+              <div class="relative">
+                <h2 class="font-display text-3xl leading-none text-paper-2">
+                  Terminou a leitura?
+                </h2>
+                <p class="mt-2 max-w-xl text-paper/85">
+                  Marcar como concluído libera o próximo capítulo da trilha.
+                  Você também pode liberar concluindo o minigame — vale qualquer
+                  um dos dois.
+                </p>
+                <div class="mt-6 flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    data-complete="partida-de-portugal"
+                    class="inline-flex items-center gap-2 border-[3px] border-ink bg-comic px-5 py-3 font-display text-xl tracking-wide text-paper-2 shadow-[5px_5px_0_rgba(18,20,26,.85)] transition-transform hover:-translate-y-[2px] disabled:cursor-default disabled:bg-lock disabled:shadow-none disabled:hover:translate-y-0"
+                  >
+                    ✓
+                    <span data-complete-label="partida-de-portugal"
+                      >Marcar como concluído</span
+                    >
+                  </button>
+                </div>
+                <a
+                  data-next-link="partida-de-portugal"
+                  href="#capitulo-travessia-atlantico"
+                  data-route="capitulo-travessia-atlantico"
+                  class="mt-6 inline-flex items-center gap-2 font-display text-xl tracking-wide text-gold hover:text-gold-soft"
+                  hidden
+                  >Ir para o Capítulo 2 →</a
+                >
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- =====================================================
+             CAPÍTULO 2 — CONTEXTO DA TRAVESSIA
+             ===================================================== -->
+        <div data-view="capitulo-travessia-atlantico" hidden>
+          <section class="relative border-b-[3px] border-ink bg-navy">
+            <img
+              src="images/cap-2-travessia.jpg"
+              alt="Ilustração do capítulo 2"
+              class="absolute inset-0 size-full object-cover opacity-55"
+            />
+            <div
+              class="absolute inset-0 bg-gradient-to-r from-navy via-navy/90 to-navy/40"
+              aria-hidden="true"
+            ></div>
+            <div
+              class="pointer-events-none absolute inset-0 halftone-light"
+              aria-hidden="true"
+            ></div>
+            <div class="relative mx-auto max-w-[1180px] px-5 py-14">
+              <a
+                href="#historia-do-brasil"
+                data-route="historia"
+                class="inline-flex items-center gap-2 font-display text-lg tracking-wide text-gold hover:text-gold-soft"
+                >← História do Brasil</a
+              >
+              <div class="mt-4 flex flex-wrap items-center gap-2">
+                <span
+                  class="inline-flex items-center gap-1 border-2 border-ink bg-paper px-2 py-[1px] font-display text-[13px] tracking-wide text-ink"
+                  >MINIGAME</span
+                >
+                <span
+                  data-completed-stamp="travessia-atlantico"
+                  class="inline-block border-2 border-ink bg-comic px-2 py-[2px] font-display text-sm leading-none tracking-wider text-paper-2 uppercase shadow-[2px_2px_0_rgba(18,20,26,.8)]"
+                  hidden
+                  >Concluído</span
+                >
+              </div>
+              <h1
+                class="panel-in mt-3 max-w-3xl font-display text-5xl leading-[0.95] text-paper-2 sm:text-6xl"
+              >
+                Capítulo 2 — A Travessia do Atlântico e o Desvio
+              </h1>
+              <p class="font-hand text-2xl text-gold-soft">
+                Março e abril de 1500
+              </p>
+            </div>
+          </section>
+
+          <section class="mx-auto max-w-[900px] px-5 py-14">
+            <div class="mb-8">
+              <p class="font-hand text-2xl text-comic">leitura do capítulo</p>
+              <h2
+                class="font-display text-4xl leading-none text-ink sm:text-5xl"
+              >
+                Cenas
+              </h2>
+              <span class="mt-3 block h-[3px] w-24 bg-ink"></span>
+            </div>
+            <div class="grid gap-7">
+              <article
+                class="panel-in relative overflow-hidden ink-panel rounded-[3px] bg-paper-2 p-6 text-ink sm:p-8"
+              >
+                <div
+                  class="pointer-events-none absolute inset-0 halftone"
+                  aria-hidden="true"
+                ></div>
+                <div class="relative">
+                  <p
+                    class="inline-block border-2 border-ink bg-gold-soft px-3 py-1 font-display text-lg leading-none tracking-wide text-ink"
+                  >
+                    Contexto
+                  </p>
+                  <p class="mt-4 text-lg leading-relaxed text-ink/90">
+                    A frota abre um grande arco para oeste — a chamada volta do
+                    mar — buscando ventos e correntes oceânicas favoráveis. O
+                    desvio coloca os navios em direção a uma terra que não
+                    estava nos mapas europeus da época.
+                  </p>
+                </div>
+              </article>
+            </div>
+
+            <div
+              class="relative mt-12 overflow-hidden ink-panel rounded-[3px] bg-navy p-7 text-paper sm:p-9"
+            >
+              <div
+                class="pointer-events-none absolute inset-0 halftone"
+                aria-hidden="true"
+              ></div>
+              <div class="relative">
+                <h2 class="font-display text-3xl leading-none text-paper-2">
+                  Terminou a leitura?
+                </h2>
+                <p class="mt-2 max-w-xl text-paper/85">
+                  Marcar como concluído registra seu progresso. Depois, conduza
+                  a esquadra pelo Atlântico no minigame da travessia.
+                </p>
+                <div class="mt-6 flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    data-complete="travessia-atlantico"
+                    class="inline-flex items-center gap-2 border-[3px] border-ink bg-comic px-5 py-3 font-display text-xl tracking-wide text-paper-2 shadow-[5px_5px_0_rgba(18,20,26,.85)] transition-transform hover:-translate-y-[2px] disabled:cursor-default disabled:bg-lock disabled:shadow-none disabled:hover:translate-y-0"
+                  >
+                    ✓
+                    <span data-complete-label="travessia-atlantico"
+                      >Marcar como concluído</span
+                    >
+                  </button>
+                  <a
+                    href="travessia-atlantico/index.html"
+                    class="inline-flex items-center gap-2 border-[3px] border-ink bg-gold px-5 py-3 font-display text-xl tracking-wide text-ink shadow-[5px_5px_0_rgba(18,20,26,.85)] transition-transform hover:-translate-y-[2px]"
+                    >⚓ Jogar minigame</a
+                  >
+                </div>
+                <a
+                  data-next-link="travessia-atlantico"
+                  href="#historia-do-brasil"
+                  data-route="historia"
+                  class="mt-6 inline-flex items-center gap-2 font-display text-xl tracking-wide text-gold hover:text-gold-soft"
+                  hidden
+                  >Voltar para os capítulos →</a
+                >
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <!-- =======================================================
+           RODAPÉ
+           ======================================================= -->
+      <footer
+        id="sobre"
+        class="mt-24 border-t-[3px] border-ink bg-navy text-paper"
+      >
+        <div class="relative mx-auto max-w-[1180px] px-5 py-14">
+          <div
+            class="pointer-events-none absolute inset-0 halftone-light"
+            aria-hidden="true"
+          ></div>
+          <div class="relative grid gap-10 md:grid-cols-3">
+            <div>
+              <p class="font-hand text-3xl text-gold-soft">História em Jogo</p>
+              <p class="mt-2 max-w-sm text-paper/80">
+                Projeto educacional que reúne HQs interativas e minigames para o
+                ensino de História. A História sai do livro e vira experiência.
+              </p>
+            </div>
+            <div>
+              <h3 class="font-display text-2xl tracking-wide text-gold">
+                Para professores
+              </h3>
+              <p class="mt-2 text-paper/80">
+                Cada capítulo traz contexto histórico antes do jogo. O progresso
+                do aluno fica salvo no próprio navegador — sem login, sem
+                cadastro.
+              </p>
+            </div>
+            <div>
+              <h3 class="font-display text-2xl tracking-wide text-gold">
+                Para colaboradores
+              </h3>
+              <p class="mt-2 text-paper/80">
+                Novos capítulos e minigames podem ser adicionados diretamente
+                neste HTML, seguindo a mesma estrutura visual.
+              </p>
+            </div>
           </div>
-          <a class="button primary ink" href="conteudos/historia-do-brasil/travessia-atlantico/index.html">Começar a jornada <span aria-hidden="true">▶</span></a>
+          <p
+            class="relative mt-10 border-t border-paper/20 pt-5 text-sm text-paper/60"
+          >
+            Projeto acadêmico — História em Jogo · “A História Sai do Livro”
+          </p>
         </div>
-        <div class="story-poster" aria-hidden="true">
-          <span class="poster-top">UMA EXPEDIÇÃO • MUITOS CAMINHOS</span>
-          <span class="poster-year">1500</span>
-          <span class="poster-title">TERRA<br>À VISTA!</span>
-          <div class="poster-wave wave-a"></div><div class="poster-wave wave-b"></div>
-        </div>
-      </article>
+      </footer>
+    </div>
 
-      <div class="future-grid" aria-label="Próximas histórias">
-        <article class="future-card"><span class="future-icon">＋</span><div><span>NOVAS HISTÓRIAS</span><h3>Acervo em expansão</h3><p>Outros períodos e lugares poderão receber cenas e minigames.</p></div></article>
-      </div>
-    </section>
-
-  </main>
-
-  <footer><div class="brand compact"><span class="brand-seal">HJ</span><strong>História em Jogo</strong></div><p>Projeto educativo colaborativo • História, cenas e minigames</p><button id="creditsButton" type="button">Créditos do sistema</button></footer>
-
-  <dialog id="aboutDialog" aria-labelledby="dialogTitle">
-    <button class="dialog-close" id="closeDialog" type="button" aria-label="Fechar">×</button>
-    <span class="eyebrow dark">SOBRE O PROJETO</span>
-    <h2 id="dialogTitle">História em Jogo</h2>
-    <p>Um sistema educativo colaborativo que organiza histórias, cenas ilustradas e minigames produzidos pelos alunos.</p>
-    <p>A primeira coleção apresenta capítulos sobre o Descobrimento do Brasil. Novos trabalhos podem ser integrados por links, mantendo cada projeto independente.</p>
-  </dialog>
-  <script src="script.js"></script>
-</body>
+    <script src="js/script.js"></script>
+  </body>
 </html>
